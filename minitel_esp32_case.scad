@@ -1,6 +1,9 @@
 /*
   Mini Minitel enclosure for the iodeo ESP Minitel V2 JST/cable board.
 
+  v0.2 work-in-progress: proportions rebuilt from the approximately
+  250 x 220 x 260 mm real Minitel envelope and the owner's photographs.
+
   Board geometry is based on the official v2.2 Gerber outline and mounting
   holes, checked against photographs of the actual board.
 
@@ -16,10 +19,10 @@ fit_clearance = 0.25;
 wall = 2.4;
 
 // Main enclosure dimensions.
-body_w = 60;
-body_d = 34;
+body_w = 68;
+body_d = 58;
 body_h = 60;
-corner_r = 3.0;
+corner_r = 4.0;
 
 // Official Gerber board extents, rotated so the JST lead points down.
 pcb_w = 36.22;
@@ -100,13 +103,13 @@ module side_service_openings() {
 module side_vents() {
     // Rearward horizontal slots echo the original Minitel cabinet while
     // staying clear of USB-C and RESET nearer the front of the right wall.
-    for (z = [35.5:3.0:50.5])
-        translate([body_w/2 - wall - 0.5, 23.0, z])
-            cube([wall + 2, 7.0, 1.25]);
+    for (z = [34.0:3.0:49.0])
+        translate([body_w/2 - wall - 0.5, 43.0, z])
+            cube([wall + 2, 9.0, 1.25]);
 }
 
 module front_fixing_holes() {
-    for (x = [-25, 25], z = [17, 49])
+    for (x = [-29, 29], z = [17, 49])
         y_cylinder(x, z, -0.3, 7.0, 3.0 + 2*fit_clearance);
 }
 
@@ -154,17 +157,18 @@ module body() {
         board_mounts();
 
         // Small feet keep the cable exit from being pinched on a desk.
-        for (x = [-23, 23])
-            translate([x-3, 8, -1.2]) cube([6, 12, 1.4]);
+        for (x = [-27, 27])
+            translate([x-3, 18, -1.2]) cube([6, 20, 1.4]);
     }
 }
 
 module keyboard_wedge() {
-    // A compact Minitel-style keyboard deck protruding from the front.
+    // The real Minitel keyboard projects far forward when opened. Keeping
+    // this depth near 56% of the body width fixes v0.1's arcade-cabinet look.
     polyhedron(
         points=[
-            [-27,-2, 3], [27,-2, 3], [27,-15,3], [-27,-15,3],
-            [-27,-2,17], [27,-2,17], [27,-15,8], [-27,-15,8]
+            [-33,-2, 3], [33,-2, 3], [32,-40,3], [-32,-40,3],
+            [-33,-2,17], [33,-2,17], [32,-40,6.5], [-32,-40,6.5]
         ],
         faces=[
             [0,1,2,3], [4,7,6,5], [0,4,5,1],
@@ -173,10 +177,10 @@ module keyboard_wedge() {
     );
 }
 
-function keyboard_z(y) = 8 + (y + 15) * (9/13);
+function keyboard_z(y) = 6.5 + (y + 40) * (10.5/38);
 
 module keycap(x, y, w=3.6, d=2.2) {
-    key_angle = atan(9/13);
+    key_angle = atan(10.5/38);
     translate([x, y, keyboard_z(y)])
         rotate([key_angle, 0, 0])
             translate([-w/2, -d/2, -0.20])
@@ -184,42 +188,41 @@ module keycap(x, y, w=3.6, d=2.2) {
 }
 
 module keyboard_keys() {
-    // Four staggered rows plus a spacebar: deliberately simplified but
-    // recognizable at this scale and printable with a 0.4 mm nozzle.
-    for (row = [0:3]) {
-        y = -12.2 + row*2.45;
-        count = row == 0 ? 10 : (row == 1 ? 9 : 8);
-        spacing = 4.7;
-        shift = row*0.55;
+    // Five well-separated rows fill the opened deck like the real keyboard.
+    for (row = [0:4]) {
+        y = -34.0 + row*5.7;
+        count = row == 0 ? 12 : (row == 1 ? 11 : 10);
+        spacing = 4.75;
+        shift = row*0.42;
         for (col = [0:count-1]) {
             x = (col-(count-1)/2)*spacing + shift;
             // Leave one position open for the separately coloured Enter key.
-            if (!(row == 1 && col == 5)) keycap(x, y);
+            if (!(row == 3 && col == 7)) keycap(x, y, 4.0, 3.0);
         }
     }
-    keycap(0, -3.35, 18, 2.4);
+    keycap(0, -36.8, 18, 3.0);
 }
 
 module keyboard_front_lip() {
     // The rolled front edge gives the open keyboard the toy-like silhouette
     // used by the project avatar and the full-size reference Minitel.
-    translate([-27, -16.0, 3.0]) cube([54, 1.5, 2.2]);
+    translate([-32, -41.4, 3.0]) cube([64, 1.8, 2.5]);
 }
 
 module screen_bezel() {
     // Raised rounded CRT surround around the removable screen insert.
     difference() {
-        translate([0, -1.90, 24.2])
-            rounded_plate_xz(48.0, 30.2, 0.75, 3.1);
-        translate([0, -1.80, 26.1])
-            rounded_plate_xz(43.3, 25.9, 1.8, 2.5);
+        translate([0, -1.90, 20.8])
+            rounded_plate_xz(58.0, 35.0, 0.85, 4.0);
+        translate([0, -1.80, 23.4])
+            rounded_plate_xz(53.2, 30.4, 1.9, 3.2);
     }
 }
 
 module top_ribs() {
     // Three fine horizontal cabinet ribs from the photographed Minitel.
-    for (z = [53.0, 54.15, 55.30])
-        translate([-23.5, -2.42, z]) cube([47.0, 0.50, 0.48]);
+    for (z = [55.0, 56.10, 57.20])
+        translate([-27.5, -2.42, z]) cube([55.0, 0.50, 0.45]);
 }
 
 module front_retainer_posts() {
@@ -235,7 +238,7 @@ module front_retainer_posts() {
 }
 
 module front_fixing_pins() {
-    for (x = [-25, 25], z = [17, 49])
+    for (x = [-29, 29], z = [17, 49])
         y_cylinder(x, z, 0, 6.4, 2.90);
 }
 
@@ -262,8 +265,8 @@ module front() {
         }
 
         // Rounded 0.9 mm-deep seat for the separately printable CRT insert.
-        translate([0, -1.10, 27.0])
-            rounded_plate_xz(41.6, 22.8, 1.05, 2.3);
+        translate([0, -1.10, 24.0])
+            rounded_plate_xz(51.8, 29.2, 1.05, 3.0);
 
         // Continue the JST cable notch through the front rim/deck rear.
         translate([-14.0, -2.5, -1.0])
@@ -273,17 +276,17 @@ module front() {
 
 module screen() {
     difference() {
-        translate([0, -1.42, 27.3])
-            rounded_plate_xz(41.0, 22.2, 0.82, 2.15);
+        translate([0, -1.42, 24.3])
+            rounded_plate_xz(51.2, 28.6, 0.82, 2.85);
 
         // Subtle horizontal scan-line grooves.
-        for (z = [30.0:3.0:47.0])
-            translate([-18.2, -2.30, z])
-                cube([36.4, 0.18, 0.28]);
+        for (z = [27.2:3.2:49.6])
+            translate([-22.5, -2.30, z])
+                cube([45.0, 0.18, 0.28]);
     }
 
     // Small terminal prompt matching the avatar, readable at thumbnail scale.
-    translate([-13.5, -2.18, 36.0])
+    translate([-17.0, -2.18, 36.0])
         rotate([90, 0, 0])
             linear_extrude(height=0.45)
                 text(">", size=6.2,
@@ -293,14 +296,14 @@ module screen() {
 
 module accent() {
     // Green Enter key in the deliberately omitted keyboard position.
-    key_angle = atan(9/13);
-    translate([5.25, -9.75, keyboard_z(-9.75)])
+    key_angle = atan(10.5/38);
+    translate([13.135, -16.9, keyboard_z(-16.9)])
         rotate([key_angle, 0, 0])
-            translate([-1.8, -1.1, 0])
-                cube([3.6, 2.2, 0.95]);
+            translate([-2.0, -1.5, 0])
+                cube([4.0, 3.0, 0.95]);
 
     // Tiny status lens to the right of the CRT surround.
-    translate([24.8, -2.0, 30.0])
+    translate([31.0, -2.0, 27.5])
         rounded_plate_xz(1.8, 3.5, 0.65, 0.42);
 }
 

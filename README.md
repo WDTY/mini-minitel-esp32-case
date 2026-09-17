@@ -6,13 +6,13 @@ A small, printable Minitel-shaped enclosure for the
 [iodeo ESP Minitel V2](https://github.com/iodeo/Minitel-ESP32) board with the
 JST cable-to-DIN connector.
 
-The physical model deliberately follows the project avatar: a rounded CRT
+The v0.2 test model deliberately follows the project avatar: a rounded CRT
 cabinet, recessed dark screen, top ribs, open sloping keyboard, green Enter key
 and status light, and cabinet vents on the right side.
 
-![Front preview of the Mini Minitel enclosure](preview.png)
+![Front preview of the proportionally rebuilt v0.2 enclosure](preview-v0.2.png)
 
-![Right-side preview showing the deeper CRT cabinet and service openings](preview-side.png)
+![Right-side preview showing the deeper CRT cabinet and service openings](preview-side-v0.2.png)
 
 The ESP32 PCB is mounted vertically behind the faux screen. The JST lead exits
 through the bottom. USB-C has its own plug-sized side opening and RESET has a
@@ -29,7 +29,7 @@ photographs as a practical size reference.
 ![Component and ESP32 sides of the PCB](pcb-closeups.jpg)
 
 > [!IMPORTANT]
-> This is **prototype v0.1**. The PCB outline and locating holes come from the
+> This is **test prototype v0.2**. The PCB outline and locating holes come from the
 > official v2.2 Gerber/drill files and were checked against photographs of a
 > real board. Component heights cannot be recovered completely from Gerber, so
 > the design deliberately includes extra internal clearance. Print and test the
@@ -38,7 +38,7 @@ photographs as a practical size reference.
 ## Features
 
 - Parametric OpenSCAD source
-- Approximately 60 × 60 × 34 mm body
+- Approximately 68 × 60 × 58 mm body, rebuilt from real Minitel proportions
 - Rounded CRT bezel and screen insert, top cabinet ribs and side vents
 - Sloping open keyboard with a pronounced front lip
 - Separate green Enter-key/status-light accent part
@@ -46,29 +46,32 @@ photographs as a practical size reference.
 - Bottom cable exit
 - Separate USB-C opening with clearance for a moulded plug
 - Protected RESET pinhole for a paperclip or thin tool
-- Simplified printable keyboard and raised `MINITEL`/`3615` details
+- Simplified printable keyboard and raised terminal-prompt detail
 - Two hardware reference images, including a front/back close-up
 
 ## Repository layout
 
 ```text
 minitel_esp32_case.scad       Parametric source model
-minitel_*_v0.1.stl           Ready-to-slice prototype meshes
-preview.png                   Front preview
-preview-side.png              Right-side functional preview
+minitel_*_v0.2.stl           Current ready-to-test meshes
+minitel_*_v0.1.stl           Archived first prototype meshes
+preview-v0.2.png              Current front preview
+preview-side-v0.2.png         Current right-side functional preview
+preview.png                   Archived v0.1 front preview
+preview-side.png              Archived v0.1 side preview
 project-avatar.png            Square transparent project avatar
 hardware-overview.jpg         Complete cable and DIN connector
 pcb-closeups.jpg              Both PCB sides in one image
 LICENSE                       CC BY-SA 4.0 license
 ```
 
-The assembly STL is intended for inspection only. Print the four individual
+The v0.2 assembly STL is intended for inspection only. Print the four individual
 parts instead. The tiny accent STL is best assigned to green filament as a
 multi-part object in OrcaSlicer; it may be omitted for a single-colour print.
 
 ## First fit test
 
-Print `minitel_body_v0.1.stl` first and test without applying force:
+Print **only `minitel_body_v0.2.stl` first** and test without applying force:
 
 1. Check that the four 0.90 mm locating pins enter the PCB holes.
 2. Confirm that no rear-side component touches a support post.
@@ -111,9 +114,12 @@ deck and rear pins.
 5. Press the screen into its shallow seat. Add a tiny amount of glue only after
    the fit is confirmed.
 
+Only after the body passes this test should you print the v0.2 front, screen
+and accent parts.
+
 Classic colours are beige for the body/front and dark green or black for the
 screen. The screen is a separate part, so a multi-material system is optional.
-The raised `3615` text can be colour-painted in the slicer.
+The raised terminal prompt can be colour-painted in the slicer.
 
 ## Editing and exporting
 
@@ -140,3 +146,10 @@ therefore also licensed under the
 [Creative Commons Attribution-ShareAlike 4.0 International License](LICENSE).
 
 Contributions and real-world fit reports are welcome.
+
+## Version history
+
+- **v0.2 test prototype:** authentic deeper cabinet proportions and a much
+  longer fold-down keyboard; ready for a body-only hardware fit test.
+- **v0.1 experimental prototype:** first PCB-mounting proof of concept; kept in
+  the repository for comparison.
