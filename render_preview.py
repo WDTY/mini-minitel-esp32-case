@@ -15,10 +15,10 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parent
 VERSION = "v0.2"
 PARTS = [
-    (f"minitel_body_{VERSION}.stl", np.array([0.73, 0.62, 0.45])),
-    (f"minitel_front_{VERSION}.stl", np.array([0.86, 0.76, 0.59])),
-    (f"minitel_screen_{VERSION}.stl", np.array([0.045, 0.16, 0.14])),
-    (f"minitel_accent_{VERSION}.stl", np.array([0.08, 0.70, 0.39])),
+    (f"archive/{VERSION}/minitel_body_{VERSION}.stl", np.array([0.73, 0.62, 0.45])),
+    (f"archive/{VERSION}/minitel_front_{VERSION}.stl", np.array([0.86, 0.76, 0.59])),
+    (f"archive/{VERSION}/minitel_screen_{VERSION}.stl", np.array([0.045, 0.16, 0.14])),
+    (f"archive/{VERSION}/minitel_accent_{VERSION}.stl", np.array([0.08, 0.70, 0.39])),
 ]
 
 
@@ -168,19 +168,19 @@ def transform(triangles, matrix, offset):
 if __name__ == "__main__":
     rasterize(
         printable_parts(),
-        f"preview-{VERSION}.png",
+        f"archive/{VERSION}/preview-{VERSION}.png",
         eye=(118, -176, 103),
         target=(0, 2, 27),
     )
     rasterize(
         printable_parts(),
-        f"preview-side-{VERSION}.png",
+        f"archive/{VERSION}/preview-side-{VERSION}.png",
         eye=(174, -128, 130),
         target=(2, 8, 28),
     )
     rasterize(
         printable_parts(include_front=False) + pcb_mockup(),
-        f"preview-mounting-{VERSION}.png",
+        f"archive/{VERSION}/preview-mounting-{VERSION}.png",
         eye=(102, -168, 102),
         target=(0, 14, 27),
         view_angle=29,

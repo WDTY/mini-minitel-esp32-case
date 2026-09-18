@@ -1,6 +1,6 @@
 /* v0.3 compatibility upgrade for an already printed v0.2 body. */
 
-use <minitel_esp32_case.scad>
+use <archive/v0.2/minitel_esp32_case.scad>
 
 part = "assembly"; // [carrier, lid, keyboard, reset, assembly]
 $fn = 48;
