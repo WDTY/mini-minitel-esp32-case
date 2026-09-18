@@ -1,6 +1,6 @@
 # Mini Minitel ESP32 case
 
-<img src="project-avatar.png" alt="Mini Minitel project avatar" width="180">
+<img src="assets/project-avatar.png" alt="Mini Minitel project avatar" width="180">
 
 A printable Minitel-shaped enclosure for the
 [iodeo ESP Minitel V2](https://github.com/iodeo/Minitel-ESP32) JST cable-to-DIN board.
@@ -9,52 +9,63 @@ A printable Minitel-shaped enclosure for the
 
 The experimental parts aim to reuse an already printed v0.2 body: a separate
 PCB carrier, inset lid, removable keyboard and protruding reset plunger.
-See [design and test notes](V0.3-COMPAT-DESIGN.md).
+See [design and test notes](docs/V0.3-COMPAT-DESIGN.md).
+
+For the next fit test, print
+[`stl/v0.3/minitel_carrier_v0.3-test.stl`](stl/v0.3/minitel_carrier_v0.3-test.stl)
+only. Keep the already printed v0.2 body.
 
 > [!WARNING]
-> Fit is not verified. The PCB in the renders is a simplified mock-up, not an
-> exact model. The carrier, mounting positions, USB-C clearance and reset
-> operation need checking against the actual PCB before another print.
-> Keep the existing v0.2 body; do not force the board into it.
+> Physical fit is not verified yet. The PCB in the renders uses the exact v2.2
+> Gerber outline, cut-outs and mounting holes, but omits electronic components.
+> USB-C clearance, reset operation and clip force still need checking on the
+> real board. Keep the existing v0.2 body and do not force any snap feature.
 
 ## Assembly and carrier renders
 
 Actual v0.3 meshes, viewed from the front-right. The complete exterior includes
 the retained v0.2 body and its screen/accent inserts. Electronic components are
-omitted: the USB opening and reset cap shown here do not establish alignment.
+omitted, so the USB opening and reset cap still need a physical alignment test.
 
-![Complete v0.3 exterior assembly](preview-assembly-v0.3.png)
+![Complete v0.3 exterior assembly](assets/renders/v0.3/preview-assembly-v0.3.png)
 
-The current carrier STL is shown unchanged below. **It does not follow the real
-PCB contour yet:** the lower left clip is outside the narrow main PCB section,
-and the top latch is over the sloping shoulder rather than the top board edge.
-Do not print this carrier as a confirmed correction.
+The replacement carrier follows the routed PCB perimeter and uses all five
+Gerber mounting holes as locating points. The four round sockets fit the
+unchanged v0.2 body pins. Two compliant hooks retain the top and bottom board
+edges; the right edge remains clear for USB-C and RESET.
 
-![Current v0.3 carrier alone](preview-carrier-v0.3.png)
+![Gerber-matched v0.3 carrier alone](assets/renders/v0.3/preview-carrier-v0.3.png)
 
-This comparison replaces the old rectangular PCB mock-up with the outline,
-four internal cutouts and five mounting holes extracted from iodeo's v2.2
-Gerbers. It matches the characteristic shape in the
+The seated and exploded views use the outline, four internal cutouts and five
+mounting holes extracted from iodeo's v2.2 Gerbers. They match the characteristic
+shape in the
 [upstream 3D view](https://github.com/iodeo/Minitel-ESP32/blob/39c49b8462b46dfb7da84c08aecdd48e5c52a224/hardware/ESP%20Minitel%20Devboard%20-%203d%20view.png).
 It is a bare-board geometric reference, not a complete electronic assembly.
 
-![Gerber-derived PCB placed at the current carrier position](preview-carrier-pcb-v0.3.png)
+![Gerber-derived PCB seated in the replacement carrier](assets/renders/v0.3/preview-carrier-pcb-v0.3.png)
 
-![Exploded carrier and Gerber-derived PCB comparison](preview-carrier-exploded-v0.3.png)
+With the lid removed, the carrier and bare-board reference sit inside the
+unchanged v0.2 body as follows:
 
-See [reference provenance and limitations](PCB-REFERENCE.md). The old
-`preview-v0.3-compat.png` uses a rectangular mock-up and is superseded by these
-comparisons.
+![Replacement carrier and PCB inside the retained v0.2 body](assets/renders/v0.3/preview-v0.3-compat.png)
 
-## Current files
+![Exploded carrier and Gerber-derived PCB comparison](assets/renders/v0.3/preview-carrier-exploded-v0.3.png)
 
-- `minitel_v03_compat.scad`: experimental source.
-- `minitel_*_v0.3-test.stl`: carrier, lid, keyboard, reset plunger and assembly.
-  The assembly is for inspection, not a single printable part.
-- `render_preview.py`: preview generator; historical previews stay in the archive.
-- `render_v03_readme.py`: current assembly and carrier comparison renders.
-- `pcb_reference.scad` / `pcb_reference.stl`: bare PCB reference only, not print parts.
-- [Hardware overview](hardware-overview.jpg) and [PCB close-ups](pcb-closeups.jpg).
+See [reference provenance and limitations](docs/PCB-REFERENCE.md). The previous
+rectangular-cradle content of `preview-v0.3-compat.png` was replaced when this
+unprinted v0.3 design was revised.
+
+## Repository layout
+
+- [`src/`](src/): editable OpenSCAD sources.
+- [`stl/v0.3/`](stl/v0.3/): current printable test parts. The assembly STL is
+  for inspection, not a single printable part.
+- [`docs/`](docs/): design notes and PCB-reference provenance.
+- [`assets/renders/v0.3/`](assets/renders/v0.3/): current README renders.
+- [`assets/photos/`](assets/photos/): owner-supplied hardware photographs.
+- [`reference/`](reference/): non-printable PCB inspection mesh.
+- [`tools/`](tools/): Gerber extraction and software-render scripts.
+- [`archive/`](archive/): frozen v0.1 and v0.2 files.
 
 ## Older versions
 
@@ -68,7 +79,8 @@ the geometry or the already printed v0.2 body.
 
 ## Editing and exporting
 
-Open `minitel_v03_compat.scad` in OpenSCAD and select `carrier`, `lid`,
+Open [`src/minitel_v03_compat.scad`](src/minitel_v03_compat.scad) in OpenSCAD
+and select `carrier`, `lid`,
 `keyboard`, `reset` or `assembly` with the `part` parameter.
 
 ## Attribution and license
