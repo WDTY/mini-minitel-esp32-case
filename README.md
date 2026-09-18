@@ -17,8 +17,34 @@ See [design and test notes](V0.3-COMPAT-DESIGN.md).
 > operation need checking against the actual PCB before another print.
 > Keep the existing v0.2 body; do not force the board into it.
 
-![Carrier and simplified PCB concept](preview-v0.3-compat.png)
-![Reset plunger concept](preview-reset-v0.3.png)
+## Assembly and carrier renders
+
+Actual v0.3 meshes, viewed from the front-right. The complete exterior includes
+the retained v0.2 body and its screen/accent inserts. Electronic components are
+omitted: the USB opening and reset cap shown here do not establish alignment.
+
+![Complete v0.3 exterior assembly](preview-assembly-v0.3.png)
+
+The current carrier STL is shown unchanged below. **It does not follow the real
+PCB contour yet:** the lower left clip is outside the narrow main PCB section,
+and the top latch is over the sloping shoulder rather than the top board edge.
+Do not print this carrier as a confirmed correction.
+
+![Current v0.3 carrier alone](preview-carrier-v0.3.png)
+
+This comparison replaces the old rectangular PCB mock-up with the outline,
+four internal cutouts and five mounting holes extracted from iodeo's v2.2
+Gerbers. It matches the characteristic shape in the
+[upstream 3D view](https://github.com/iodeo/Minitel-ESP32/blob/39c49b8462b46dfb7da84c08aecdd48e5c52a224/hardware/ESP%20Minitel%20Devboard%20-%203d%20view.png).
+It is a bare-board geometric reference, not a complete electronic assembly.
+
+![Gerber-derived PCB placed at the current carrier position](preview-carrier-pcb-v0.3.png)
+
+![Exploded carrier and Gerber-derived PCB comparison](preview-carrier-exploded-v0.3.png)
+
+See [reference provenance and limitations](PCB-REFERENCE.md). The old
+`preview-v0.3-compat.png` uses a rectangular mock-up and is superseded by these
+comparisons.
 
 ## Current files
 
@@ -26,6 +52,8 @@ See [design and test notes](V0.3-COMPAT-DESIGN.md).
 - `minitel_*_v0.3-test.stl`: carrier, lid, keyboard, reset plunger and assembly.
   The assembly is for inspection, not a single printable part.
 - `render_preview.py`: preview generator; historical previews stay in the archive.
+- `render_v03_readme.py`: current assembly and carrier comparison renders.
+- `pcb_reference.scad` / `pcb_reference.stl`: bare PCB reference only, not print parts.
 - [Hardware overview](hardware-overview.jpg) and [PCB close-ups](pcb-closeups.jpg).
 
 ## Older versions

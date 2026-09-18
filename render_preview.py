@@ -146,7 +146,7 @@ def rasterize(objects, output, eye, target, view_angle=31, size=(1200, 1000)):
         inside = (a >= -1e-7) & (b >= -1e-7) & (c >= -1e-7)
         if not inside.any():
             continue
-        depth = a * tri[0, 2] + b * tri[1, 2] + c * tri[2, 2]
+        depth = 1.0 / (a / tri[0, 2] + b / tri[1, 2] + c / tri[2, 2])
         current = zbuffer[min_y:max_y + 1, min_x:max_x + 1]
         visible = inside & (depth < current)
         current[visible] = depth[visible]
