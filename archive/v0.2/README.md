@@ -2,7 +2,7 @@
 
 > Archived reference only. See the [current README](../../README.md) for status.
 
-<img src="../../project-avatar.png" alt="Mini Minitel project avatar" width="180">
+<img src="../../assets/project-avatar.png" alt="Mini Minitel project avatar" width="180">
 
 A small, printable Minitel-shaped enclosure for the
 [iodeo ESP Minitel V2](https://github.com/iodeo/Minitel-ESP32) board with the
@@ -28,9 +28,9 @@ enclosure, so the case does not hang directly from the Minitel port.
 The enclosure targets this JST cable variant. The ruler is included in the
 photographs as a practical size reference.
 
-![Complete ESP Minitel V2 board, cable and DIN connector](../../hardware-overview.jpg)
+![Complete ESP Minitel V2 board, cable and DIN connector](../../assets/photos/hardware-overview.jpg)
 
-![Component and ESP32 sides of the PCB](../../pcb-closeups.jpg)
+![Component and ESP32 sides of the PCB](../../assets/photos/pcb-closeups.jpg)
 
 > [!WARNING]
 > The first physical **v0.2** fit test found that the PCB locating pins do not
@@ -40,15 +40,15 @@ photographs as a practical size reference.
 > basis for a corrective clip-in carrier and a support-light inset front.
 
 The first v0.3 compatibility parts are documented in
-[`V0.3-COMPAT-DESIGN.md`](../../V0.3-COMPAT-DESIGN.md). They reuse an existing v0.2
+[`V0.3-COMPAT-DESIGN.md`](../../docs/V0.3-COMPAT-DESIGN.md). They reuse an existing v0.2
 body, shift the PCB on a separate edge cradle, split the front into a shallow
 inset lid and removable keyboard, and replace the reset pinhole with a retained
 external push button. Treat all v0.3 meshes as fit-test parts until verified on
 the physical print.
 
-![v0.3 carrier and shifted PCB inside the retained v0.2 body](../../preview-v0.3-compat.png)
+![v0.3 carrier and shifted PCB inside the retained v0.2 body](../../assets/renders/v0.3/preview-v0.3-compat.png)
 
-![Close-up render of the protruding retained reset plunger](../../preview-reset-v0.3.png)
+![Close-up render of the protruding retained reset plunger](../../assets/renders/v0.3/preview-reset-v0.3.png)
 
 ## Features
 
@@ -67,22 +67,15 @@ the physical print.
 ## Repository layout
 
 ```text
-minitel_esp32_case.scad       Parametric source model
-minitel_v03_compat.scad       Corrective parts for an existing v0.2 body
-minitel_*_v0.3-test.stl       Unverified carrier/lid/keyboard/reset test parts
-minitel_*_v0.2.stl           Current ready-to-test meshes
-minitel_*_v0.1.stl           Archived first prototype meshes
-preview-v0.2.png              Current three-quarter right-front hero render
-preview-side-v0.2.png         Elevated right-front functional render
-preview-mounting-v0.2.png     Open-front PCB mounting-intent render
-preview-v0.3-compat.png        Corrective carrier and shifted-PCB render
-preview-reset-v0.3.png         Protruding reset-button close-up
-V0.3-COMPAT-DESIGN.md         v0.3 recovery design and test order
-preview.png                   Archived v0.1 front preview
-preview-side.png              Archived v0.1 side preview
-project-avatar.png            Square transparent project avatar
-hardware-overview.jpg         Complete cable and DIN connector
-pcb-closeups.jpg              Both PCB sides in one image
+archive/v0.2/                 This frozen v0.2 source, meshes and renders
+archive/v0.1/                 Archived first prototype
+src/                          Current v0.3 OpenSCAD sources
+stl/v0.3/                     Current v0.3 test meshes
+docs/                         Current design and PCB-reference notes
+assets/renders/v0.3/          Current v0.3 renders
+assets/photos/                Hardware overview and PCB close-ups
+reference/                    Non-printable PCB inspection mesh
+tools/                        Gerber extraction and rendering scripts
 LICENSE                       CC BY-SA 4.0 license
 ```
 
