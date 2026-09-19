@@ -187,7 +187,7 @@ if __name__ == "__main__":
     )
 
     # Close-up of the protruding reset cap in its assembled orientation.
-    reset = load_stl(ROOT / "stl/v0.3/minitel_reset_plunger_v0.3-test.stl")
+    reset = load_stl(ROOT / "archive/v0.3/stl/minitel_reset_plunger_v0.3-test.stl")
     reset = transform(
         reset,
         [[0, 0, -1], [0, 1, 0], [1, 0, 0]],
@@ -196,7 +196,7 @@ if __name__ == "__main__":
     rasterize(
         printable_parts(include_front=False)
         + [(reset, np.array([0.08, 0.70, 0.39]))],
-        "assets/renders/v0.3/preview-reset-v0.3.png",
+        "archive/v0.3/renders/preview-reset-v0.3.png",
         eye=(110, -62, 82),
         target=(31, 12, 48),
         view_angle=18,
