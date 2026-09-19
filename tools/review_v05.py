@@ -1,6 +1,5 @@
-"""Verify and render the v0.5 K2 rear-bay fit-test parts."""
+"""Rebuild and render the complete two-part v0.5 design."""
 
-from collections import Counter
 from pathlib import Path
 import subprocess
 
@@ -9,101 +8,65 @@ import numpy as np
 from render_preview import ROOT, load_stl, rasterize
 
 
-FILES = {
-    "fixture": ROOT / "stl/v0.5/minitel_rear_bay_v0.5-test.stl",
-    "coupon": ROOT / "stl/v0.5/minitel_guide_coupon_v0.5-test.stl",
-    "retainer": ROOT / "stl/v0.5/minitel_rear_retainer_v0.5-test.stl",
-}
+SCAD = ROOT / "src/minitel_v05.scad"
+STL = ROOT / "stl/v0.5"
+RENDERS = ROOT / "assets/renders/v0.5"
+RENDERS.mkdir(parents=True, exist_ok=True)
 
 
-def topology(mesh):
-    edges = Counter()
-    for tri in mesh:
-        vertices = [tuple(round(float(v), 5) for v in vertex) for vertex in tri]
-        for a, b in zip(vertices, vertices[1:] + vertices[:1]):
-            edges[tuple(sorted((a, b)))] += 1
-    return sum(count != 2 for count in edges.values())
-
-
-parts = {}
-for name, path in FILES.items():
-    mesh = load_stl(path)
-    parts[name] = mesh
-    invalid = topology(mesh)
-    print(
-        name,
-        "triangles", len(mesh),
-        "nonmanifold_edges", invalid,
-        "bounds", mesh.min(axis=(0, 1)), mesh.max(axis=(0, 1)),
-    )
-    assert invalid == 0
-
-SCAD = ROOT / "src/minitel_v05_fit_test.scad"
-
-
-def export_reference(part, output):
+def export(part: str, output: Path):
     subprocess.run(
-        [
-            "openscad", "--export-format", "binstl",
-            "-D", f'part="{part}"', "-o", str(output), str(SCAD),
-        ],
-        check=True,
-        capture_output=True,
-        text=True,
+        ["openscad", "--export-format", "binstl", "-D", f'part="{part}"',
+         "-o", str(output), str(SCAD)],
+        check=True, capture_output=True, text=True,
     )
     return load_stl(output)
 
 
-pcb = export_reference("pcb_bare", Path("/tmp/v05_pcb_bare.stl"))
-components = export_reference("components", Path("/tmp/v05_components.stl"))
-cable = export_reference("cable", Path("/tmp/v05_cable.stl"))
-retainer_assembly = export_reference(
-    "retainer_assembly", Path("/tmp/v05_retainer_assembly.stl")
-)
+case = export("case", STL / "minitel_case_v0.5.stl")
+bay = export("bay", STL / "minitel_esp32_bay_v0.5.stl")
+pcb = export("pcb_bare", Path("/tmp/minitel-v05-pcb.stl"))
+components = export("components", Path("/tmp/minitel-v05-components.stl"))
+cable = export("cable", Path("/tmp/minitel-v05-cable.stl"))
+screen = export("render_screen", Path("/tmp/minitel-v05-screen.stl"))
+keys = export("render_keys", Path("/tmp/minitel-v05-keys.stl"))
+green = export("render_green", Path("/tmp/minitel-v05-green.stl"))
 
-beige = np.array([0.83, 0.75, 0.61])
-orange = np.array([0.80, 0.34, 0.12])
-board = np.array([0.025, 0.075, 0.060])
-metal = np.array([0.60, 0.63, 0.61])
-wire = np.array([0.035, 0.040, 0.038])
+beige = np.array([0.82, 0.73, 0.57])
+bay_colour = np.array([0.68, 0.57, 0.41])
+screen_colour = np.array([0.025, 0.075, 0.065])
+key_colour = np.array([0.27, 0.24, 0.20])
+green_colour = np.array([0.15, 0.90, 0.39])
+metal = np.array([0.55, 0.58, 0.56])
+wire = np.array([0.025, 0.028, 0.027])
+
+installed = np.array([0.0, 6.0, 2.2])
+withdrawn = np.array([0.0, 82.0, 2.2])
 
 rasterize(
-    [
-        (parts["fixture"], beige),
-        (retainer_assembly, orange),
-        (pcb, board),
-        (components, metal),
-        (cable, wire),
-    ],
-    "assets/renders/v0.5/rear-bay-assembly-v0.5.png",
-    eye=(108, 142, 98),
-    target=(0, 36, 6.5),
-    view_angle=30,
-    size=(1200, 1000),
-)
-
-# Half-inserted state. The cable remains flexible and is intentionally omitted;
-# the render checks the rigid PCB/component passage only.
-travel = np.array([0.0, 24.0, 0.0])
-rasterize(
-    [
-        (parts["fixture"], beige),
-        (retainer_assembly + np.array([0.0, 7.0, 18.0]), orange),
-        (pcb + travel, board),
-        (components + travel, metal),
-    ],
-    "assets/renders/v0.5/insertion-route-v0.5.png",
-    eye=(106, 150, 92),
-    target=(0, 46, 7.0),
-    view_angle=29,
-    size=(1200, 1000),
+    [(case, beige), (screen, screen_colour), (keys, key_colour),
+     (green, green_colour), (bay + installed, bay_colour),
+     (pcb + installed, screen_colour), (components + installed, metal),
+     (cable + installed, wire)],
+    RENDERS / "complete-assembly-v0.5.png",
+    eye=(142, -175, 112), target=(0, 10, 34), view_angle=29,
+    size=(1400, 1100),
 )
 
 rasterize(
-    [(parts["coupon"], beige)],
-    "assets/renders/v0.5/guide-coupon-v0.5.png",
-    eye=(82, -68, 58),
-    target=(0, 8, 3.5),
-    view_angle=27,
-    size=(1200, 800),
+    [(case, beige), (screen, screen_colour), (keys, key_colour),
+     (green, green_colour), (bay + withdrawn, bay_colour),
+     (pcb + withdrawn, screen_colour), (components + withdrawn, metal),
+     (cable + withdrawn, wire)],
+    RENDERS / "rear-bay-exploded-v0.5.png",
+    eye=(160, 220, 115), target=(0, 70, 26), view_angle=38,
+    size=(1400, 1100),
+)
+
+rasterize(
+    [(bay, bay_colour), (pcb, screen_colour), (components, metal),
+     (cable, wire)],
+    RENDERS / "loaded-bay-v0.5.png",
+    eye=(105, 125, 75), target=(0, 38, 8), view_angle=31,
+    size=(1300, 900),
 )
