@@ -1,0 +1,450 @@
+/*
+  Mini Minitel ESP32 case v0.5
+
+  Complete avatar-inspired Minitel enclosure plus one removable rear bay for
+  the populated iodeo ESP Minitel V2 JST board. The iodeo enclosure geometry
+  is deliberately not used. Units: mm.
+
+  Creality K2 baseline: 0.4 mm nozzle, 0.20 mm layers, PLA.
+  Select: case, bay, assembly, pcb, cable, case_bay_interference,
+          pcb_insertion_interference, bay_route_interference.
+*/
+
+include <pcb_reference.scad>
+
+part = "assembly";
+sweep_offset = 0;
+$fn = 40;
+
+// ----- Printer and measured hardware -----
+layer_h = 0.20;
+wall = 2.40;
+sliding_clearance = 0.40;       // each side, K2/PLA baseline
+pcb_length = 47.10521;
+pcb_depth = 36.21792;
+pcb_thickness = 1.60;
+populated_height = 10.40;
+pcb_slot_h = 2.20;              // 0.30 mm above/below nominal PCB
+pcb_side_clearance = 0.35;
+edge_capture = 1.00;
+cable_d = 5.0;                  // visual envelope; open cable channel
+
+watermark_text = "WDTY v0.5";
+watermark_z = 0.60;
+watermark_h = 0.60;             // three 0.20 mm layers
+
+// ----- Complete miniature Minitel envelope -----
+case_w = 78.0;
+case_d = 72.0;
+case_h = 74.0;
+case_corner = 5.0;
+case_top_inset = 2.0;
+
+// Bay is assembled outside the case and inserted from the lower rear.
+bay_w = 65.2;
+bay_d = 66.0;
+bay_floor_h = 1.80;
+bay_body_h = 17.2;
+bay_flange_w = 70.0;
+bay_flange_h = 21.0;
+bay_installed_y = case_d - bay_d;
+bay_installed_z = 2.20;
+bay_opening_w = bay_w + 2*sliding_clearance;
+bay_opening_h = bay_body_h + 0.80;
+
+// Board orientation inside the bay: JST points toward the front/loop and the
+// USB-C/RESET edge finishes at the rear service face.
+pcb_rear_y = 60.0;
+usb_outer_y = 64.0;
+loop_front_y = 4.0;
+pcb_z = 4.70;
+slot_bottom_z = pcb_z - (pcb_slot_h-pcb_thickness)/2;
+slot_top_z = slot_bottom_z + pcb_slot_h;
+board_edge_x = pcb_length/2;
+slot_wall_x = board_edge_x + pcb_side_clearance;
+lip_inner_x = board_edge_x - edge_capture;
+rail_outer_x = 28.70;
+rail_front_y = 37.40;
+rail_rear_y = 61.20;
+rail_mouth_y = 32.60;
+rail_top_z = 8.00;
+cable_z = rail_top_z + cable_d/2 + 0.35;
+
+// Approximate component positions only constrain insertion and service access.
+usb_x0 = -15.5;
+usb_x1 = -7.0;
+reset_x = -20.9;
+reset_z = pcb_z + pcb_thickness + 1.15;
+
+module rounded_rect_2d(w,h,r) {
+    offset(r=r) square([w-2*r,h-2*r],center=true);
+}
+
+module rounded_xy(w,d,h,r) {
+    linear_extrude(height=h) rounded_rect_2d(w,d,r);
+}
+
+module rounded_xz(w,h,d,r) {
+    translate([0,0,h/2]) rotate([90,0,0])
+        linear_extrude(height=d) rounded_rect_2d(w,h,r);
+}
+
+module cabinet_outer() {
+    // Gentle taper and deep CRT cabinet, matching the project avatar.
+    hull() {
+        translate([0,case_d/2,0]) rounded_xy(case_w,case_d,2.0,case_corner);
+        translate([0,case_d/2,case_h-2.0])
+            rounded_xy(case_w-2*case_top_inset,
+                       case_d-2*case_top_inset,2.0,case_corner-0.8);
+    }
+}
+
+module keyboard_wedge() {
+    // Open-Minitel proportions: almost as wide as the cabinet and visibly
+    // deeper than the screen body, as in the avatar.
+    polyhedron(
+        points=[
+            [-38, 3,0], [38, 3,0], [37,-49,0], [-37,-49,0],
+            [-38, 3,20], [38, 3,20], [37,-49,7.2], [-37,-49,7.2]
+        ],
+        faces=[
+            [0,3,2,1], [4,5,6,7], [0,1,5,4],
+            [1,2,6,5], [2,3,7,6], [3,0,4,7]
+        ]
+    );
+}
+
+function key_z(y) = 7.2 + (y+49)*(12.8/52);
+key_angle = atan(12.8/52);
+
+module keycap(x,y,w=4.2,d=3.5,h=1.0) {
+    translate([x,y,key_z(y)]) rotate([key_angle,0,0])
+        translate([-w/2,-d/2,-0.15])
+            linear_extrude(height=h) offset(r=0.55)
+                square([w-1.1,d-1.1],center=true);
+}
+
+module keyboard_keys_grey() {
+    // Avatar-style dense keyboard. Raised top faces are easy to paint by
+    // surface in Creality Print/Orca while remaining one case STL.
+    for (row=[0:4]) {
+        y = -41.0 + row*7.2;
+        count = row==0 ? 12 : (row==1 ? 11 : (row==2 ? 11 : 10));
+        spacing = 5.45;
+        shift = row==1 ? 1.5 : (row==3 ? -1.2 : 0);
+        for (col=[0:count-1]) {
+            x=(col-(count-1)/2)*spacing+shift;
+            if (!(row==3 && col==7)) keycap(x,y);
+        }
+    }
+    // Function row and space bar.
+    for (x=[-27:9:27]) keycap(x,-9.0,7.0,4.0,1.05);
+    keycap(-7.5,-45.3,24.0,3.8,1.0);
+}
+
+module keyboard_enter_key() {
+    // Green enter key position, still part of the same paintable STL.
+    keycap(15.15,-19.4,6.5,4.1,1.15);
+}
+
+module keyboard_keys() {
+    keyboard_keys_grey();
+    keyboard_enter_key();
+}
+
+module front_features() {
+    // One-piece front fascia joins all CRT details to the cabinet.
+    rounded_xz(case_w-0.8,case_h-0.8,2.0,case_corner-0.4);
+
+    // Screen surface and broad stepped surround from the avatar.
+    translate([0,-1.95,26.25]) rounded_xz(63.0,39.5,1.10,5.0);
+    difference() {
+        translate([0,-1.95,23.0]) rounded_xz(69.0,46.0,1.20,5.2);
+        translate([0,-3.20,26.65]) rounded_xz(62.2,38.7,2.2,4.9);
+    }
+
+    // Three shallow horizontal cabinet ribs above the CRT.
+    for(z=[69.0,70.1,71.2])
+        translate([-33.0,-2.05,z]) cube([66.0,0.55,0.42]);
+
+    // Green prompt and block cursor, embossed for multicolour face painting.
+    translate([-22.0,-3.03,51.0]) rotate([90,0,0])
+        linear_extrude(height=0.45)
+            text(">",size=7.0,font="Liberation Mono:style=Bold",
+                 halign="left",valign="center");
+    translate([-13.1,-3.20,48.1]) cube([4.0,0.45,6.2]);
+
+    // Status lens on the right side of the bezel.
+    translate([34.2,-1.95,29.0]) rounded_xz(2.6,5.0,2.30,0.65);
+
+    // Rolled front lip gives the characteristic open-keyboard silhouette.
+    translate([0,-48.9,0]) rounded_xz(76.0,7.2,2.2,2.0);
+    keyboard_keys();
+}
+
+// Render-only coloured surface skins. They overlap the printable one-piece
+// case by 0.08 mm and are never exported as additional print parts.
+module render_screen_skin() {
+    translate([0,-3.07,26.90]) rounded_xz(61.7,38.2,0.10,4.75);
+}
+
+module render_key_skin(x,y,w=4.2,d=3.5) {
+    translate([x,y,key_z(y)]) rotate([key_angle,0,0])
+        translate([-w/2,-d/2,0.76])
+            linear_extrude(height=0.10) offset(r=0.50)
+                square([w-1.0,d-1.0],center=true);
+}
+
+module render_grey_key_skins() {
+    for (row=[0:4]) {
+        y=-41.0+row*7.2;
+        count=row==0 ? 12 : (row==1 ? 11 : (row==2 ? 11 : 10));
+        spacing=5.45;
+        shift=row==1 ? 1.5 : (row==3 ? -1.2 : 0);
+        for(col=[0:count-1]) {
+            x=(col-(count-1)/2)*spacing+shift;
+            if(!(row==3 && col==7)) render_key_skin(x,y);
+        }
+    }
+    for(x=[-27:9:27]) render_key_skin(x,-9.0,7.0,4.0);
+    render_key_skin(-7.5,-45.3,24.0,3.8);
+}
+
+module render_green_skins() {
+    render_key_skin(15.15,-19.4,6.5,4.1);
+    translate([34.2,-4.27,29.075]) rounded_xz(2.45,4.85,0.10,0.58);
+    translate([-22.0,-3.50,51.0]) rotate([90,0,0])
+        linear_extrude(height=0.10)
+            text(">",size=7.0,font="Liberation Mono:style=Bold",
+                 halign="left",valign="center");
+    translate([-13.1,-3.50,48.1]) cube([4.0,0.10,6.2]);
+}
+
+module side_vents() {
+    for(z=[34:4:58])
+        translate([case_w/2-wall-0.8,49,z]) cube([wall+2.0,14.0,1.55]);
+}
+
+module bay_cavity() {
+    // Full-width lower passage. Chamfered roof reduces the unsupported bridge
+    // to 30 mm, suitable for the K2 after the supplied bridge settings.
+    translate([0,case_d+1.0,2.0])
+        rotate([90,0,0]) linear_extrude(height=case_d-4.0)
+            polygon(points=[
+                [-bay_opening_w/2,0], [bay_opening_w/2,0],
+                [bay_opening_w/2,bay_opening_h], [15,35],
+                [-15,35], [-bay_opening_w/2,bay_opening_h]
+            ]);
+}
+
+module rear_bay_opening() {
+    translate([-bay_flange_w/2-0.35,case_d-wall-1.0,-0.4])
+        cube([bay_flange_w+0.70,wall+3.0,
+              bay_installed_z+bay_flange_h+0.8]);
+}
+
+module hidden_case_watermark() {
+    // Enclosed inside the keyboard's solid front lip: three 0.20 mm layers.
+    translate([0,-46.5,watermark_z]) linear_extrude(height=watermark_h)
+        text(watermark_text,size=4.1,font="DejaVu Sans:style=Bold",
+             halign="center",valign="center",spacing=1.05);
+}
+
+module case_core() {
+    difference() {
+        cabinet_outer();
+        bay_cavity();
+        rear_bay_opening();
+        side_vents();
+    }
+}
+
+module case_v05() {
+    difference() {
+        union() {
+            case_core();
+            keyboard_wedge();
+            front_features();
+        }
+        hidden_case_watermark();
+    }
+}
+
+// ----- Rear bay / loaded cartridge -----
+module placed_pcb(offset_y=0,thickness=pcb_thickness) {
+    translate([-pcb_length/2,pcb_rear_y-18.11024+offset_y,pcb_z])
+        mirror([1,0,0]) rotate([0,0,90])
+            linear_extrude(height=thickness) pcb_reference_2d();
+}
+
+module reset_envelope(offset_y=0) {
+    translate([reset_x-1.8,pcb_rear_y-1.7+offset_y,pcb_z+pcb_thickness])
+        cube([3.6,3.2,2.3]);
+}
+
+module component_envelopes(offset_y=0,with_reset=true) {
+    translate([-22.0,43.0+offset_y,1.00]) cube([20.0,14.0,pcb_z-1.00]);
+    translate([usb_x0,pcb_rear_y-2.0+offset_y,pcb_z+pcb_thickness])
+        cube([usb_x1-usb_x0,usb_outer_y-pcb_rear_y+2.0,3.2]);
+    if(with_reset) reset_envelope(offset_y);
+    translate([-2.0,18.8+offset_y,pcb_z+pcb_thickness]) cube([11.0,8.0,5.10]);
+}
+
+module left_pcb_rail() {
+    difference() {
+        union() {
+            translate([-rail_outer_x,rail_front_y,bay_floor_h-0.10])
+                cube([rail_outer_x-slot_wall_x,rail_rear_y-rail_front_y,
+                      slot_bottom_z-bay_floor_h+0.10]);
+            translate([-rail_outer_x,rail_front_y,slot_bottom_z])
+                cube([rail_outer_x-slot_wall_x,rail_rear_y-rail_front_y,
+                      slot_top_z-slot_bottom_z]);
+            translate([-rail_outer_x,rail_front_y,slot_top_z])
+                cube([rail_outer_x-lip_inner_x,rail_rear_y-rail_front_y,
+                      rail_top_z-slot_top_z]);
+            // Front flare receives the broad USB-C edge while the already
+            // connected JST cable remains free above the open bay.
+            hull() {
+                translate([-rail_outer_x,rail_front_y-0.2,slot_top_z])
+                    cube([rail_outer_x-lip_inner_x,0.4,rail_top_z-slot_top_z]);
+                translate([-rail_outer_x,rail_mouth_y-0.2,slot_top_z])
+                    cube([rail_outer_x-(lip_inner_x+1.3),0.4,
+                          rail_top_z-slot_top_z]);
+            }
+            hull() {
+                translate([-rail_outer_x,rail_front_y-0.2,bay_floor_h-0.1])
+                    cube([rail_outer_x-slot_wall_x,0.4,
+                          slot_bottom_z-bay_floor_h+0.1]);
+                translate([-rail_outer_x,rail_mouth_y-0.2,bay_floor_h-0.1])
+                    cube([rail_outer_x-(slot_wall_x+1.3),0.4,
+                          slot_bottom_z-bay_floor_h+0.1]);
+            }
+        }
+        // RESET travels beside this left lip.
+        translate([-23.8,57.5,slot_top_z-0.1])
+            cube([4.9,7.2,rail_top_z-slot_top_z+0.2]);
+    }
+}
+
+module pcb_rails() {
+    left_pcb_rail();
+    mirror([1,0,0]) left_pcb_rail();
+}
+
+module cable_node(p) { translate([p[0],p[1],cable_z]) sphere(d=cable_d); }
+module cable_segment(a,b) { hull() { cable_node(a); cable_node(b); } }
+module cable_reference() {
+    // JST is connected before loading. The lead turns at 60 mm total depth
+    // from the USB outer edge and returns through the open rear notch.
+    pts=[[3.5,19.0],[3.5,9.0],[8.0,4.0],[18.0,4.0],
+         [24.5,10.0],[24.5,65.5]];
+    for(i=[0:len(pts)-2]) cable_segment(pts[i],pts[i+1]);
+}
+
+module bay_side_frames() {
+    // Continuous outside runners plus a front bridge; the PCB itself rests
+    // only in the two internal edge guides.
+    for(x=[-bay_w/2,bay_w/2-2.4])
+        translate([x,0,0]) cube([2.4,bay_d,bay_body_h]);
+    // Narrow floor runners guide the cable without forming a snap-on plate.
+    translate([-bay_w/2,0,0]) cube([5.0,bay_d,bay_floor_h]);
+    translate([bay_w/2-5.0,0,0]) cube([5.0,bay_d,bay_floor_h]);
+}
+
+module reset_cantilever() {
+    // One-piece flexible tongue, attached at the top. The outer pad protrudes
+    // 0.7 mm and the inner nub reaches the tactile switch.
+    tab_w=5.2; tab_h=8.0; tab_t=1.15;
+    translate([reset_x-tab_w/2,bay_d-tab_t,reset_z-tab_h/2])
+        cube([tab_w,tab_t,tab_h]);
+    translate([reset_x-1.55,bay_d-0.05,reset_z-1.55])
+        cube([3.1,0.68,3.1]);
+    translate([reset_x-1.15,bay_d-5.0,reset_z-1.15])
+        cube([2.3,3.1,2.3]);
+}
+
+module bay_rear_face() {
+    difference() {
+        translate([-bay_flange_w/2,bay_d-2.0,0])
+            cube([bay_flange_w,2.0,bay_flange_h]);
+        // USB-C plus normal moulded plug clearance.
+        translate([usb_x0-2.0,bay_d-2.5,pcb_z+pcb_thickness-1.5])
+            cube([(usb_x1-usb_x0)+4.0,3.5,6.4]);
+        // Open-top cable lay-in notch: the DIN plug never passes through it.
+        translate([20.0,bay_d-2.5,7.4]) cube([10.0,3.5,bay_flange_h+2.0]);
+        // U-slot leaves the reset tongue connected only across its top edge.
+        translate([reset_x-3.3,bay_d-2.5,reset_z-5.0]) cube([6.6,3.5,0.8]);
+        translate([reset_x-3.3,bay_d-2.5,reset_z-5.0]) cube([0.8,3.5,10.0]);
+        translate([reset_x+2.5,bay_d-2.5,reset_z-5.0]) cube([0.8,3.5,10.0]);
+    }
+    reset_cantilever();
+}
+
+module bay_detents() {
+    // Shallow friction beads, printable without support and intentionally
+    // conservative for the K2. Sand once if a filament runs oversized.
+    for(x=[-bay_w/2-0.18,bay_w/2+0.18])
+        translate([x,bay_d-12,7.5]) rotate([90,0,0]) cylinder(h=5,d=0.70);
+}
+
+module hidden_bay_watermark() {
+    translate([0,bay_d-1.0,watermark_z]) linear_extrude(height=watermark_h)
+        text(watermark_text,size=1.35,font="DejaVu Sans:style=Bold",
+             halign="center",valign="center",spacing=1.05);
+}
+
+module bay_v05(with_detents=true) {
+    difference() {
+        union() {
+            bay_side_frames();
+            pcb_rails();
+            bay_rear_face();
+            if(with_detents) bay_detents();
+        }
+        hidden_bay_watermark();
+    }
+}
+
+module assembly_v05() {
+    color("#dcc9a4") case_v05();
+    translate([0,bay_installed_y,bay_installed_z]) color("#c9b48f") bay_v05();
+    translate([0,bay_installed_y,bay_installed_z]) color("#10201b") placed_pcb();
+    translate([0,bay_installed_y,bay_installed_z]) color("#a9aaa6") component_envelopes();
+    translate([0,bay_installed_y,bay_installed_z]) color("#222222") cable_reference();
+}
+
+if(part=="case") case_v05();
+else if(part=="bay") bay_v05();
+else if(part=="assembly") assembly_v05();
+else if(part=="pcb") { placed_pcb(); component_envelopes(); }
+else if(part=="pcb_bare") placed_pcb();
+else if(part=="components") component_envelopes();
+else if(part=="cable") cable_reference();
+else if(part=="render_screen") render_screen_skin();
+else if(part=="render_keys") render_grey_key_skins();
+else if(part=="render_green") render_green_skins();
+else if(part=="case_bay_interference") intersection() {
+    case_core();
+    translate([0,bay_installed_y+sweep_offset,bay_installed_z]) bay_v05(false);
+}
+else if(part=="loaded_bay_interference") intersection() {
+    case_core();
+    translate([0,bay_installed_y+sweep_offset,bay_installed_z]) union() {
+        bay_v05(false);
+        placed_pcb();
+        component_envelopes(0,false);
+        cable_reference();
+    }
+}
+else if(part=="pcb_insertion_interference") intersection() {
+    bay_v05();
+    union() { placed_pcb(sweep_offset); component_envelopes(sweep_offset,false); }
+}
+else if(part=="bay_route_interference") intersection() {
+    bay_v05();
+    union() { placed_pcb(); component_envelopes(0,false); cable_reference(); }
+}
+else if(part=="reset_contact") intersection() {
+    reset_cantilever();
+    reset_envelope();
+}
