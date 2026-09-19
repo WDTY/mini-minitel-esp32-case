@@ -5,13 +5,37 @@
 A printable Minitel-shaped enclosure for the
 [iodeo ESP Minitel V2](https://github.com/iodeo/Minitel-ESP32) JST cable-to-DIN board.
 
-## Current version: v0.3 test
+## Latest: v0.4 geometry-review prototype
+
+The official iodeo cassette sits horizontally at the bottom, with its original
+end cap at the lower rear. The fixed Minitel front and keyboard form one body.
+This requires a new body print; it is not an upgrade for the printed v0.2 body.
+
+> [!WARNING]
+> **Review prototype, not a validated print release.** Cable routing, JST
+> clearance, reset operation, cap fit and support removal still need checking.
+> The original cap interface has small interference regions in the sampled
+> removal test; the added outer shell adds none. Await the original-case fit
+> test. Do not print the assembly as one part.
+
+- [Assembly STL for inspection](stl/v0.4/minitel_assembly_v0.4-review.stl)
+- [Body STL](stl/v0.4/minitel_body_v0.4-review.stl)
+- [Original cap, positioned at rear](stl/v0.4/minitel_cover_v0.4-review.stl)
+- [Design, validation results and rebuild commands](docs/V0.4-PROTOTYPE.md)
+- [Editable OpenSCAD source](src/minitel_v04.scad)
+
+Actual exported meshes; cap shown 14 mm rearward in the second view.
+
+![v0.4 front-right view](assets/renders/v0.4/front-review.png)
+![v0.4 lower rear opening and exploded cap](assets/renders/v0.4/rear-review.png)
+
+## Retained alternative: v0.3 test
 
 The experimental parts aim to reuse an already printed v0.2 body: a separate
 PCB carrier, inset lid, removable keyboard and protruding reset plunger.
 See [design and test notes](docs/V0.3-COMPAT-DESIGN.md).
 
-For the next fit test, print
+For a v0.3 carrier fit test, print
 [`stl/v0.3/minitel_carrier_v0.3-test.stl`](stl/v0.3/minitel_carrier_v0.3-test.stl)
 only. Keep the already printed v0.2 body.
 
@@ -58,12 +82,13 @@ unprinted v0.3 design was revised.
 ## Repository layout
 
 - [`src/`](src/): editable OpenSCAD sources.
-- [`stl/v0.3/`](stl/v0.3/): current printable test parts. The assembly STL is
+- [`stl/v0.4/`](stl/v0.4/): latest geometry-review prototype meshes.
+- [`stl/v0.3/`](stl/v0.3/): retained v0.2-compatible test parts. The assembly STL is
   for inspection, not a single printable part.
 - [`docs/`](docs/): design notes and PCB-reference provenance.
-- [`assets/renders/v0.3/`](assets/renders/v0.3/): current README renders.
+- [`assets/renders/`](assets/renders/): versioned CAD renders.
 - [`assets/photos/`](assets/photos/): owner-supplied hardware photographs.
-- [`reference/`](reference/): non-printable PCB inspection mesh.
+- [`reference/`](reference/): PCB inspection mesh and unchanged iodeo donor STLs.
 - [`tools/`](tools/): Gerber extraction and software-render scripts.
 - [`archive/`](archive/): frozen v0.1 and v0.2 files.
 
