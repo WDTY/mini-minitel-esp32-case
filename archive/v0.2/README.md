@@ -40,15 +40,15 @@ photographs as a practical size reference.
 > basis for a corrective clip-in carrier and a support-light inset front.
 
 The first v0.3 compatibility parts are documented in
-[`V0.3-COMPAT-DESIGN.md`](../../docs/V0.3-COMPAT-DESIGN.md). They reuse an existing v0.2
+[`V0.3-COMPAT-DESIGN.md`](../v0.3/V0.3-COMPAT-DESIGN.md). They reuse an existing v0.2
 body, shift the PCB on a separate edge cradle, split the front into a shallow
 inset lid and removable keyboard, and replace the reset pinhole with a retained
 external push button. Treat all v0.3 meshes as fit-test parts until verified on
 the physical print.
 
-![v0.3 carrier and shifted PCB inside the retained v0.2 body](../../assets/renders/v0.3/preview-v0.3-compat.png)
+![v0.3 carrier and shifted PCB inside the retained v0.2 body](../v0.3/renders/preview-v0.3-compat.png)
 
-![Close-up render of the protruding retained reset plunger](../../assets/renders/v0.3/preview-reset-v0.3.png)
+![Close-up render of the protruding retained reset plunger](../v0.3/renders/preview-reset-v0.3.png)
 
 ## Features
 
@@ -70,9 +70,9 @@ the physical print.
 archive/v0.2/                 This frozen v0.2 source, meshes and renders
 archive/v0.1/                 Archived first prototype
 src/                          Current v0.3 OpenSCAD sources
-stl/v0.3/                     Current v0.3 test meshes
+archive/v0.3/stl/             Archived v0.3 test meshes
 docs/                         Current design and PCB-reference notes
-assets/renders/v0.3/          Current v0.3 renders
+archive/v0.3/renders/         Archived v0.3 renders
 assets/photos/                Hardware overview and PCB close-ups
 reference/                    Non-printable PCB inspection mesh
 tools/                        Gerber extraction and rendering scripts
