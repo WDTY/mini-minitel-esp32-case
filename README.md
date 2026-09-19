@@ -5,34 +5,34 @@
 A printable Minitel-shaped enclosure for the
 [iodeo ESP Minitel V2](https://github.com/iodeo/Minitel-ESP32) JST cable-to-DIN board.
 
-## Latest: v0.5 rear-bay fit test
+## Latest: complete two-part v0.5
 
-v0.5 tests the replacement mounting architecture for the populated JST board:
-the connected PCB slides directly into two edge guides, the cable makes a
-60 mm relaxed turn and returns above the right guide, and a removable rear
-retainer prevents the board from sliding back. There is no snap-on PCB plate.
+v0.5 is the complete avatar-inspired miniature Minitel. It prints as exactly
+two parts: one full cabinet and one removable ESP32 bay. The external design
+uses no geometry from the iodeo electronics enclosure.
 
-Print the small guide coupon first on a Creality K2 with a 0.4 mm nozzle and
-0.20 mm layers. If that fits, print the open bay and retainer. The full
-Minitel-shaped body will be regenerated only after this physical fit gate.
+Connect JST first, slide the PCB into the bay's edge guides, form the measured
+60 mm cable turn and slide the loaded bay into the lower rear of the Minitel.
+USB-C and the protruding flexible RESET pad remain accessible at the back. The
+DIN plug lays into an open-top notch and never passes through a printed hole.
 
-- [Small guide coupon STL — print this first](stl/v0.5/minitel_guide_coupon_v0.5-test.stl)
-- [Complete open rear-bay test STL](stl/v0.5/minitel_rear_bay_v0.5-test.stl)
-- [Rear retainer STL](stl/v0.5/minitel_rear_retainer_v0.5-test.stl)
-- [Measurements, K2 settings and test procedure](docs/V0.5-FIT-TEST.md)
-- [Editable OpenSCAD source](src/minitel_v05_fit_test.scad)
+- [Complete Minitel case STL](stl/v0.5/minitel_case_v0.5.stl)
+- [Removable ESP32 bay STL](stl/v0.5/minitel_esp32_bay_v0.5.stl)
+- [Dimensions, assembly route, K2 settings and multicolour guide](docs/V0.5-DESIGN.md)
+- [Editable OpenSCAD source](src/minitel_v05.scad)
 
-The first render shows the final routed position. The second shows the populated
-PCB partway through the checked rear insertion path with the retainer lifted.
+The single case STL is prepared for surface painting in Creality Print or
+OrcaSlicer: beige cabinet, dark CRT and keys, with a green prompt, cursor,
+Enter key and status lens.
 
-![v0.5 rear bay with populated PCB and cable route](assets/renders/v0.5/rear-bay-assembly-v0.5.png)
-![v0.5 PCB insertion route and lifted retainer](assets/renders/v0.5/insertion-route-v0.5.png)
-![v0.5 small guide coupon](assets/renders/v0.5/guide-coupon-v0.5.png)
+![Complete multicolour v0.5 assembly](assets/renders/v0.5/complete-assembly-v0.5.png)
+![Loaded bay behind the lower rear opening](assets/renders/v0.5/rear-bay-exploded-v0.5.png)
+![ESP32, connected cable and U-turn in the bay](assets/renders/v0.5/loaded-bay-v0.5.png)
 
-> [!IMPORTANT]
-> This is a fit fixture, not the complete enclosure. The exact Gerber board and
-> measured 10.4 mm populated height clear the modelled insertion route, but the
-> physical K2 coupon decides the final guide tolerance. Do not force the PCB.
+Both parts contain an enclosed `WDTY v0.5` watermark spanning three 0.20 mm
+layers. The STL meshes are manifold. Automated checks sample 49 PCB insertion
+positions and 71 loaded-bay insertion positions without rigid collisions.
+Physical cable stiffness and RESET travel still require the first K2 print.
 
 ## Rejected v0.4 donor-cassette prototype
 
@@ -109,13 +109,13 @@ unprinted v0.3 design was revised.
 ## Repository layout
 
 - [`src/`](src/): editable OpenSCAD sources.
-- [`stl/v0.5/`](stl/v0.5/): current guide coupon, rear-bay fixture and retainer.
+- [`stl/v0.5/`](stl/v0.5/): the two current printable parts.
 - [`docs/`](docs/): design notes and PCB-reference provenance.
 - [`assets/renders/`](assets/renders/): current CAD renders.
 - [`assets/photos/`](assets/photos/): owner-supplied hardware photographs.
 - [`reference/`](reference/): PCB inspection mesh and unchanged iodeo donor STLs.
 - [`tools/`](tools/): Gerber extraction and software-render scripts.
-- [`archive/`](archive/): superseded v0.1 through v0.4 source, meshes and renders.
+- [`archive/`](archive/): superseded versions and development fixtures.
 
 ## Older versions
 
@@ -131,10 +131,9 @@ the geometry or the already printed v0.2 body.
 
 ## Editing and exporting
 
-Open [`src/minitel_v05_fit_test.scad`](src/minitel_v05_fit_test.scad) in
-OpenSCAD and select `fixture`, `coupon`, `retainer` or `assembly` with the
-`part` parameter. See the v0.5 design notes for reproducible export and
-clearance-check commands.
+Open [`src/minitel_v05.scad`](src/minitel_v05.scad) in OpenSCAD and select
+`case`, `bay` or `assembly` with the `part` parameter. See the v0.5 design
+notes for reproducible export, render and clearance-check commands.
 
 ## Attribution and license
 
