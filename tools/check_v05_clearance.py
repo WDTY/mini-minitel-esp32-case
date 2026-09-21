@@ -14,6 +14,7 @@ from render_preview import ROOT, load_stl
 SCAD = ROOT / "src/minitel_v05.scad"
 FILES = {
     "case": ROOT / "stl/v0.5/minitel_case_v0.5.stl",
+    "keyboard": ROOT / "stl/v0.5/minitel_keyboard_v0.5.stl",
     "bay": ROOT / "stl/v0.5/minitel_esp32_bay_v0.5.stl",
 }
 
@@ -83,7 +84,7 @@ for name, path in FILES.items():
     print(name, "surface shell diagonals:", shells)
     assert sum(size > 10 for size in shells) == 1, "Detached structural part"
 
-assert len(list((ROOT / "stl/v0.5").glob("*.stl"))) == 2
+assert len(list((ROOT / "stl/v0.5").glob("*.stl"))) == 3
 
 with tempfile.TemporaryDirectory(prefix="minitel-v05-") as directory:
     root = Path(directory)
@@ -109,6 +110,9 @@ with tempfile.TemporaryDirectory(prefix="minitel-v05-") as directory:
     latch_rest = intersection_exists("pcb_latch_rest_contact", root / "latch-rest.stl")
     latch_retention = intersection_exists("pcb_latch_retention_contact", root / "latch-lock.stl")
     bay_stop = intersection_exists("bay_stop_contact", root / "bay-stop.stl")
+    keyboard_case = intersection_exists(
+        "keyboard_case_interference", root / "keyboard-case.stl"
+    )
     cable_path = root / "cable.stl"
     intersection_exists("cable", cable_path)
     cable_mesh = load_stl(cable_path)
@@ -129,8 +133,10 @@ print("Reset contact after 0.5 mm inward travel:", reset_pressed)
 print("PCB latch touches at rest:", latch_rest)
 print("PCB latch catches after 0.7 mm outward travel:", latch_retention)
 print("Bay flange catches shoulder after 0.20 mm overtravel:", bay_stop)
+print("Keyboard/case hard collision at nominal fit:", keyboard_case)
 print("USB-C edge to outside of cable bend (mm):", round(64.0 - cable_front, 3))
 
-if (pcb_hits or loaded_bay_hits or route_hit or reset_contact or not reset_pressed
+if (pcb_hits or loaded_bay_hits or route_hit or keyboard_case
+        or reset_contact or not reset_pressed
         or latch_rest or not latch_retention or not bay_stop):
     raise SystemExit(1)
