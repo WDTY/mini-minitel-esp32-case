@@ -25,6 +25,8 @@ def export(part: str, output: Path):
 
 case = export("case", STL / "minitel_case_v0.5.stl")
 bay = export("bay", STL / "minitel_esp32_bay_v0.5.stl")
+bay_no_latch = export("bay_no_latch", Path("/tmp/minitel-v05-bay-no-latch.stl"))
+latch = export("pcb_latch", Path("/tmp/minitel-v05-latch.stl"))
 pcb = export("pcb_bare", Path("/tmp/minitel-v05-pcb.stl"))
 components = export("components", Path("/tmp/minitel-v05-components.stl"))
 cable = export("cable", Path("/tmp/minitel-v05-cable.stl"))
@@ -40,7 +42,7 @@ green_colour = np.array([0.15, 0.90, 0.39])
 metal = np.array([0.55, 0.58, 0.56])
 wire = np.array([0.025, 0.028, 0.027])
 
-installed = np.array([0.0, 6.0, 2.2])
+installed = np.array([0.0, 5.90, 2.2])
 withdrawn = np.array([0.0, 82.0, 2.2])
 
 rasterize(
@@ -68,5 +70,12 @@ rasterize(
      (cable, wire)],
     RENDERS / "loaded-bay-v0.5.png",
     eye=(105, 125, 75), target=(0, 38, 8), view_angle=31,
+    size=(1300, 900),
+)
+
+rasterize(
+    [(bay_no_latch, bay_colour), (latch, green_colour)],
+    RENDERS / "bay-mechanics-v0.5.png",
+    eye=(42, -145, 142), target=(0, 33, 5), view_angle=26,
     size=(1300, 900),
 )
