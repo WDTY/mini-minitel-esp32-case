@@ -38,6 +38,7 @@ funnels inward toward that recessed edge to match the project avatar.
 ![Hollow cabinet, bay guides and print bridge ribs](assets/renders/v0.5/hollow-case-cutaway-v0.5.png)
 ![Loaded bay behind the lower rear opening](assets/renders/v0.5/rear-bay-exploded-v0.5.png)
 ![ESP32, connected cable and U-turn in the bay](assets/renders/v0.5/loaded-bay-v0.5.png)
+![Bottom-open USB-C access at the rear face](assets/renders/v0.5/usb-access-v0.5.png)
 ![U-rails, front bridge and PCB retention latch](assets/renders/v0.5/bay-mechanics-v0.5.png)
 
 All three parts contain an enclosed `WDTY v0.5` watermark spanning three
@@ -47,10 +48,13 @@ reduce the rear-down front-wall bridge to 24 mm. The curved CRT backing
 overlaps the cabinet by 3.2 mm, so it forms one continuous structure without
 a slit.
 
-This remains a mechanical prototype, not a fit-verified release. The revised
-bay has a releasable PCB latch, a positive flange shoulder and open guides for
-the measured 4.3 mm cable. Those guides are not hard strain relief. Physical
-connector positions, latch force and RESET travel still need verification.
+This remains a mechanical prototype rather than a fully fit-verified release.
+A physical ESP Minitel V2 test confirms the PCB/rail fit and cable route. That
+test also exposed a USB-C window that sat too high; the rear face now uses a
+bottom-open service notch. The bay has a releasable PCB latch, a positive
+flange shoulder and open guides for the measured 4.3 mm cable. Those guides
+are not hard strain relief. Plug clearance, latch force and RESET travel still
+need verification after printing the corrected bay.
 See the mechanical audit before printing: a collision-free reference model
 alone does not prove physical fit.
 
