@@ -6,7 +6,8 @@
   is deliberately not used. Units: mm.
 
   Creality K2 baseline: 0.4 mm nozzle, 0.20 mm layers, PLA.
-  Select: case, bay, assembly, pcb, cable, case_bay_interference,
+  Select: case, case_assembly, keyboard, bay, assembly, pcb, cable,
+          keyboard_case_interference, case_bay_interference,
           pcb_insertion_interference, bay_route_interference.
 */
 
@@ -41,6 +42,17 @@ case_d = 72.0;
 case_h = 74.0;
 case_corner = 5.0;
 case_top_inset = 2.0;
+
+// The keyboard is a separate, flat-bottomed multicolour print. Four rigid
+// tongues locate it in clearance pockets in the lower front of the cabinet.
+// The 0.30 mm per-face clearance is deliberately conservative for K2/PLA.
+keyboard_seam_y = -2.20;
+keyboard_tab_w = 7.0;
+keyboard_tab_d = 7.0;
+keyboard_tab_h = 3.0;
+keyboard_tab_clearance = 0.30;
+keyboard_tab_x = [-23.0,23.0];
+keyboard_tab_z = [5.0,13.0];
 
 // Bay is assembled outside the case and inserted from the lower rear.
 bay_w = 65.2;
@@ -115,6 +127,20 @@ module cabinet_outer() {
     }
 }
 
+module cabinet_inner() {
+    // True hollow envelope. The slightly thinner 2.0 mm lower skin gives the
+    // installed bay 0.20 mm floor clearance; all other walls remain 2.4 mm.
+    hull() {
+        translate([0,case_d/2,2.0])
+            rounded_xy(case_w-2*wall,case_d-2*wall,2.0,
+                       case_corner-wall/2);
+        translate([0,case_d/2,case_h-wall-2.0])
+            rounded_xy(case_w-2*case_top_inset-2*wall,
+                       case_d-2*case_top_inset-2*wall,2.0,
+                       case_corner-1.0-wall/2);
+    }
+}
+
 module keyboard_wedge() {
     // Open-Minitel proportions: almost as wide as the cabinet and visibly
     // deeper than the screen body, as in the avatar.
@@ -168,15 +194,69 @@ module keyboard_keys() {
     keyboard_enter_key();
 }
 
-module front_features() {
-    // One-piece front fascia joins all CRT details to the cabinet.
-    rounded_xz(case_w-0.8,case_h-0.8,2.0,case_corner-0.4);
+module keyboard_front_lip() {
+    translate([0,-48.9,0]) rounded_xz(76.0,7.2,2.2,2.0);
+}
 
-    // Screen surface and broad stepped surround from the avatar.
-    translate([0,-1.95,26.25]) rounded_xz(63.0,39.5,1.10,5.0);
+module keyboard_tabs() {
+    for(x=keyboard_tab_x,z=keyboard_tab_z)
+        // Start inside the rear face of the wedge so every tongue has a
+        // positive-volume connection instead of only sharing a coplanar face.
+        translate([x-keyboard_tab_w/2,keyboard_seam_y-0.8,z])
+            cube([keyboard_tab_w,keyboard_tab_d,keyboard_tab_h]);
+}
+
+module keyboard_receiver_holes() {
+    for(x=keyboard_tab_x,z=keyboard_tab_z)
+        translate([x-keyboard_tab_w/2-keyboard_tab_clearance,
+                   keyboard_seam_y-1.0,
+                   z-keyboard_tab_clearance])
+            cube([keyboard_tab_w+2*keyboard_tab_clearance,
+                  keyboard_tab_d+1.4,
+                  keyboard_tab_h+2*keyboard_tab_clearance]);
+}
+
+module hidden_keyboard_watermark() {
+    // Enclosed inside the keyboard's solid front lip: three 0.20 mm layers.
+    translate([0,-46.5,watermark_z]) linear_extrude(height=watermark_h)
+        text(watermark_text,size=4.1,font="DejaVu Sans:style=Bold",
+             halign="center",valign="center",spacing=1.05);
+}
+
+module keyboard_v05() {
     difference() {
-        translate([0,-1.95,23.0]) rounded_xz(69.0,46.0,1.20,5.2);
-        translate([0,-3.20,26.65]) rounded_xz(62.2,38.7,2.2,4.9);
+        union() {
+            // Remove the former 2.2 mm overlap with the front fascia. The
+            // resulting visible seam is only the intentional assembly seam.
+            intersection() {
+                union() {
+                    keyboard_wedge();
+                    keyboard_keys();
+                    keyboard_front_lip();
+                }
+                translate([-50,-60,-1])
+                    cube([100,60+keyboard_seam_y,32]);
+            }
+            keyboard_tabs();
+        }
+        hidden_keyboard_watermark();
+    }
+}
+
+module front_features() {
+    // The front fascia extends 3.2 mm into the rounded cabinet. This is a
+    // structural overlap, not a coplanar touch, and closes the former visible
+    // slit between the CRT/front stack and the cabinet body.
+    translate([0,3.2,0])
+        rounded_xz(case_w-0.8,case_h-0.8,5.2,case_corner-0.4);
+
+    // Screen surface and broad stepped surround from the avatar. Both overlap
+    // the fascia behind them by 0.2 mm. The cutter passes completely through
+    // the bezel, leaving a real ring rather than two coincident plates.
+    translate([0,-1.80,26.25]) rounded_xz(63.0,39.5,1.45,5.0);
+    difference() {
+        translate([0,-1.80,23.0]) rounded_xz(69.0,46.0,1.70,5.2);
+        translate([0,-1.50,26.65]) rounded_xz(62.2,38.7,2.30,4.9);
     }
 
     // Three shallow horizontal cabinet ribs above the CRT.
@@ -184,24 +264,21 @@ module front_features() {
         translate([-33.0,-2.05,z]) cube([66.0,0.55,0.42]);
 
     // Green prompt and block cursor, embossed for multicolour face painting.
-    translate([-22.0,-3.03,51.0]) rotate([90,0,0])
-        linear_extrude(height=0.45)
+    translate([-22.0,-3.25,51.0]) rotate([90,0,0])
+        linear_extrude(height=0.40)
             text(">",size=7.0,font="Liberation Mono:style=Bold",
                  halign="left",valign="center");
-    translate([-13.1,-3.20,48.1]) cube([4.0,0.45,6.2]);
+    translate([-13.1,-3.25,48.1]) rotate([90,0,0])
+        linear_extrude(height=0.40) square([4.0,6.2]);
 
     // Status lens on the right side of the bezel.
-    translate([34.2,-1.95,29.0]) rounded_xz(2.6,5.0,2.30,0.65);
-
-    // Rolled front lip gives the characteristic open-keyboard silhouette.
-    translate([0,-48.9,0]) rounded_xz(76.0,7.2,2.2,2.0);
-    keyboard_keys();
+    translate([34.2,-3.45,29.0]) rounded_xz(2.6,5.0,0.60,0.65);
 }
 
 // Render-only coloured surface skins. They overlap the printable one-piece
 // case by 0.08 mm and are never exported as additional print parts.
 module render_screen_skin() {
-    translate([0,-3.07,26.90]) rounded_xz(61.7,38.2,0.10,4.75);
+    translate([0,-3.27,26.90]) rounded_xz(61.7,38.2,0.10,4.75);
 }
 
 module render_key_skin(x,y,w=4.2,d=3.5) {
@@ -228,12 +305,13 @@ module render_grey_key_skins() {
 
 module render_green_skins() {
     render_key_skin(15.15,-19.4,6.5,4.1);
-    translate([34.2,-4.27,29.075]) rounded_xz(2.45,4.85,0.10,0.58);
-    translate([-22.0,-3.50,51.0]) rotate([90,0,0])
+    translate([34.2,-4.07,29.075]) rounded_xz(2.45,4.85,0.10,0.58);
+    translate([-22.0,-3.67,51.0]) rotate([90,0,0])
         linear_extrude(height=0.10)
             text(">",size=7.0,font="Liberation Mono:style=Bold",
                  halign="left",valign="center");
-    translate([-13.1,-3.50,48.1]) cube([4.0,0.10,6.2]);
+    translate([-13.1,-3.67,48.1]) rotate([90,0,0])
+        linear_extrude(height=0.10) square([4.0,6.2]);
 }
 
 module side_vents() {
@@ -254,6 +332,43 @@ module bay_cavity() {
             ]);
 }
 
+module bay_guide_structure() {
+    // The hollow cabinet no longer needs a solid tunnel around the cartridge.
+    // Two thin U-shaped longitudinal rails locate its sides and prevent lift.
+    guide_y0=4.5;
+    guide_y1=case_d-bay_flange_recess_d;
+    guide_inner_x=bay_opening_w/2;
+    guide_outer_x=case_w/2-wall;
+    guide_top_z=bay_installed_z+bay_body_h+0.80;
+
+    for(side=[-1,1]) {
+        x0=side<0 ? -guide_outer_x : guide_inner_x;
+        translate([x0,guide_y0,1.60])
+            cube([guide_outer_x-guide_inner_x,
+                  guide_y1-guide_y0,
+                  guide_top_z-1.60]);
+
+        // Inward top lip turns each longitudinal guide into a real U-channel.
+        lip_x0=side<0 ? -guide_outer_x : guide_inner_x-4.8;
+        translate([lip_x0,guide_y0,guide_top_z])
+            cube([guide_outer_x-guide_inner_x+4.8,
+                  guide_y1-guide_y0,wall]);
+    }
+}
+
+module rear_print_bridge_ribs() {
+    // Printing on the flat rear turns the front wall into a roof. Three
+    // permanent 1.2 mm ribs reduce its maximum bridge from ~70 mm to 24 mm
+    // while leaving virtually the complete upper cabinet volume hollow.
+    rib_t=1.20;
+    rib_z0=bay_installed_z+bay_body_h+wall+1.0;
+    for(x=[-24,0,24])
+        translate([x-rib_t/2,wall-0.4,rib_z0])
+            // End at Y=69.8: 0.2 mm inside the rear wall but 0.1 mm clear
+            // of the installed bay flange, whose inner face begins at 69.9.
+            cube([rib_t,case_d-2*wall+0.6,case_h-wall-rib_z0]);
+}
+
 module rear_bay_opening() {
     // The narrow through-opening passes only the cartridge body. A wider,
     // shallow outer pocket receives the flange and leaves a positive axial
@@ -268,18 +383,24 @@ module rear_bay_opening() {
 }
 
 module hidden_case_watermark() {
-    // Enclosed inside the keyboard's solid front lip: three 0.20 mm layers.
-    translate([0,-46.5,watermark_z]) linear_extrude(height=watermark_h)
+    // With the case printed on its rear, original Y becomes print Z. This void
+    // therefore remains exactly three 0.20 mm layers inside the rear wall.
+    translate([0,case_d-watermark_z,55]) rotate([90,0,0])
+        linear_extrude(height=watermark_h)
         text(watermark_text,size=4.1,font="DejaVu Sans:style=Bold",
              halign="center",valign="center",spacing=1.05);
 }
 
 module case_core() {
-    difference() {
-        cabinet_outer();
-        bay_cavity();
-        rear_bay_opening();
-        side_vents();
+    union() {
+        difference() {
+            cabinet_outer();
+            cabinet_inner();
+            rear_bay_opening();
+            side_vents();
+        }
+        bay_guide_structure();
+        rear_print_bridge_ribs();
     }
 }
 
@@ -287,11 +408,24 @@ module case_v05() {
     difference() {
         union() {
             case_core();
-            keyboard_wedge();
             front_features();
         }
         hidden_case_watermark();
+        keyboard_receiver_holes();
     }
+}
+
+module case_print_v05() {
+    // Export orientation: broad flat rear face on Z=0. CRT and green details
+    // become bounded top layers; no slicer rotation is required.
+    translate([0,0,case_d]) rotate([-90,0,0]) case_v05();
+}
+
+module imported_case_assembly() {
+    // Inverse of case_print_v05(), used so route tests still inspect the exact
+    // exported print STL in the normal assembly coordinate system.
+    rotate([90,0,0]) translate([0,0,-case_d])
+        import("../stl/v0.5/minitel_case_v0.5.stl");
 }
 
 // ----- Rear bay / loaded cartridge -----
@@ -473,13 +607,22 @@ module bay_v05(with_detents=true,with_latch=true) {
 
 module assembly_v05() {
     color("#dcc9a4") case_v05();
+    color("#dcc9a4") keyboard_v05();
     translate([0,bay_installed_y,bay_installed_z]) color("#c9b48f") bay_v05();
     translate([0,bay_installed_y,bay_installed_z]) color("#10201b") placed_pcb();
     translate([0,bay_installed_y,bay_installed_z]) color("#a9aaa6") component_envelopes();
     translate([0,bay_installed_y,bay_installed_z]) color("#222222") cable_reference();
 }
 
-if(part=="case") case_v05();
+if(part=="case") case_print_v05();
+else if(part=="case_assembly") case_v05();
+else if(part=="case_cutaway") difference() {
+    case_v05();
+    // Remove the right half plus the centre bridge rib so the hollow volume,
+    // left bay U-guide and remaining print rib are visible in the review.
+    translate([-5,-8,-1]) cube([65,90,90]);
+}
+else if(part=="keyboard") keyboard_v05();
 else if(part=="bay") bay_v05();
 else if(part=="bay_no_latch") bay_v05(true,false);
 else if(part=="pcb_latch") pcb_retention_latch();
@@ -491,12 +634,16 @@ else if(part=="cable") cable_reference();
 else if(part=="render_screen") render_screen_skin();
 else if(part=="render_keys") render_grey_key_skins();
 else if(part=="render_green") render_green_skins();
+else if(part=="keyboard_case_interference") intersection() {
+    case_v05();
+    keyboard_v05();
+}
 else if(part=="case_bay_interference") intersection() {
-    import("../stl/v0.5/minitel_case_v0.5.stl");
+    imported_case_assembly();
     translate([0,bay_installed_y+sweep_offset,bay_installed_z]) bay_v05(false,true);
 }
 else if(part=="loaded_bay_interference") intersection() {
-    import("../stl/v0.5/minitel_case_v0.5.stl");
+    imported_case_assembly();
     translate([0,bay_installed_y+sweep_offset,bay_installed_z]) union() {
         bay_v05(false,true);
         placed_pcb();
@@ -533,6 +680,6 @@ else if(part=="pcb_latch_retention_contact") intersection() {
     placed_pcb(-0.70);
 }
 else if(part=="bay_stop_contact") intersection() {
-    import("../stl/v0.5/minitel_case_v0.5.stl");
+    imported_case_assembly();
     translate([0,bay_installed_y-0.20,bay_installed_z]) bay_v05(false,false);
 }
