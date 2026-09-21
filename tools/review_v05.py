@@ -104,6 +104,13 @@ rasterize(
 )
 
 rasterize(
+    [(bay, bay_colour), (pcb, screen_colour), (components, metal)],
+    RENDERS / "usb-access-v0.5.png",
+    eye=(70, 145, 44), target=(-7, 55, 7), view_angle=28,
+    size=(1300, 850),
+)
+
+rasterize(
     [(bay_no_latch, bay_colour), (latch, green_colour)],
     RENDERS / "bay-mechanics-v0.5.png",
     eye=(42, -145, 142), target=(0, 33, 5), view_angle=26,
