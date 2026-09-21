@@ -28,11 +28,18 @@ Enter key and status lens.
 ![Complete multicolour v0.5 assembly](assets/renders/v0.5/complete-assembly-v0.5.png)
 ![Loaded bay behind the lower rear opening](assets/renders/v0.5/rear-bay-exploded-v0.5.png)
 ![ESP32, connected cable and U-turn in the bay](assets/renders/v0.5/loaded-bay-v0.5.png)
+![U-rails, front bridge and PCB retention latch](assets/renders/v0.5/bay-mechanics-v0.5.png)
 
 Both parts contain an enclosed `WDTY v0.5` watermark spanning three 0.20 mm
-layers. The STL meshes are manifold. Automated checks sample 49 PCB insertion
-positions and 71 loaded-bay insertion positions without rigid collisions.
-Physical cable stiffness and RESET travel still require the first K2 print.
+layers. This remains a mechanical prototype, not a fit-verified release.
+The revised guide has upper and lower lips and the rear skin is closed above
+the bay. Tests check the complete case, PCB support and reset rest clearance.
+The rear opening header requires local support. The revised bay has a
+releasable PCB latch, a positive flange shoulder and open guides for the
+measured 4.3 mm cable. Those guides are not hard strain relief. Physical
+connector positions, latch force and RESET travel still need verification.
+See the mechanical audit before printing: a collision-free reference model
+alone does not prove physical fit.
 
 ## Rejected v0.4 donor-cassette prototype
 
