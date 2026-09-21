@@ -259,12 +259,15 @@ module front_features() {
     // aperture is tight at the recessed screen edge and opens toward the
     // viewer, producing the characteristic inward-running Minitel surround.
     difference() {
-        translate([0,-1.80,23.0]) rounded_xz(69.0,46.0,2.30,5.2);
+        // Only a narrow flat rim remains at the front. Most of the visible
+        // surround is the clean tapered return found in the avatar close-up.
+        translate([0,-1.80,23.0]) let($fn=64)
+            rounded_xz(69.0,46.0,2.38,4.8);
         hull() {
-            translate([0,-1.35,26.55])
-                rounded_xz(62.4,38.9,0.20,4.85);
-            translate([0,-4.18,25.50])
-                rounded_xz(64.5,41.0,0.30,5.15);
+            translate([0,-1.35,26.55]) let($fn=64)
+                rounded_xz(62.4,38.9,0.20,4.45);
+            translate([0,-4.24,24.25]) let($fn=64)
+                rounded_xz(67.0,43.5,0.30,4.75);
         }
     }
 
@@ -281,7 +284,7 @@ module front_features() {
         linear_extrude(height=0.55) square([4.0,6.2]);
 
     // Status lens on the right side of the bezel.
-    translate([34.2,-3.45,29.0]) rounded_xz(2.6,5.0,0.60,0.65);
+    translate([36.0,-3.45,29.0]) rounded_xz(2.6,5.0,0.60,0.65);
 }
 
 // Render-only coloured surface skins. They overlap the printable one-piece
@@ -340,7 +343,7 @@ module render_grey_key_skins() {
 
 module render_green_skins() {
     render_key_skin(15.15,-19.4,6.5,4.1);
-    translate([34.2,-4.07,29.075]) rounded_xz(2.45,4.85,0.10,0.58);
+    translate([36.0,-4.07,29.075]) rounded_xz(2.45,4.85,0.10,0.58);
     translate([-22.0,-4.02,51.0]) rotate([90,0,0])
         linear_extrude(height=0.10)
             text(">",size=7.0,font="Liberation Mono:style=Bold",
