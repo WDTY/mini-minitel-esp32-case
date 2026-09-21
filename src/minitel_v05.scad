@@ -27,7 +27,9 @@ populated_height = 10.40;
 pcb_slot_h = 2.20;              // 0.30 mm above/below nominal PCB
 pcb_side_clearance = 0.35;
 edge_capture = 1.00;
-cable_d = 5.0;                  // visual envelope; open cable channel
+cable_d = 4.30;                 // measured black DIN lead
+din_plug_d = 15.50;             // measured; plug remains outside the bay
+reset_protrusion = 1.50;        // measured beyond the PCB rear edge
 
 watermark_text = "WDTY v0.5";
 watermark_z = 0.60;
@@ -47,7 +49,11 @@ bay_floor_h = 1.80;
 bay_body_h = 17.2;
 bay_flange_w = 70.0;
 bay_flange_h = 21.0;
-bay_installed_y = case_d - bay_d;
+bay_flange_t = 2.0;
+bay_flange_recess_d = 2.25;
+bay_stop_clearance = 0.15;
+bay_installed_y = case_d - bay_d - bay_flange_recess_d
+                  + bay_flange_t + bay_stop_clearance;
 bay_installed_z = 2.20;
 bay_opening_w = bay_w + 2*sliding_clearance;
 bay_opening_h = bay_body_h + 0.80;
@@ -56,7 +62,10 @@ bay_opening_h = bay_body_h + 0.80;
 // USB-C/RESET edge finishes at the rear service face.
 pcb_rear_y = 60.0;
 usb_outer_y = 64.0;
-loop_front_y = 4.0;
+// Owner measured 60 mm from protruding USB-C to the outside of the relaxed
+// cable bend, not to its centreline.
+loop_depth = 60.0;
+loop_front_y = usb_outer_y - loop_depth + cable_d/2;
 pcb_z = 4.70;
 slot_bottom_z = pcb_z - (pcb_slot_h-pcb_thickness)/2;
 slot_top_z = slot_bottom_z + pcb_slot_h;
@@ -75,6 +84,13 @@ usb_x0 = -15.5;
 usb_x1 = -7.0;
 reset_x = -20.9;
 reset_z = pcb_z + pcb_thickness + 1.15;
+
+// Accessible floor cantilever that clicks behind the narrow JST-side nose.
+pcb_latch_x = 15.1;
+pcb_latch_tip_y = 23.20;
+pcb_latch_w = 3.0;
+pcb_latch_t = 0.80;
+pcb_latch_hook_z = pcb_z + 0.35;
 
 module rounded_rect_2d(w,h,r) {
     offset(r=r) square([w-2*r,h-2*r],center=true);
@@ -228,8 +244,9 @@ module side_vents() {
 module bay_cavity() {
     // Full-width lower passage. Chamfered roof reduces the unsupported bridge
     // to 30 mm, suitable for the K2 after the supplied bridge settings.
-    translate([0,case_d+1.0,2.0])
-        rotate([90,0,0]) linear_extrude(height=case_d-4.0)
+    // Keep the internal roof behind the rear skin, not open to the exterior.
+    translate([0,case_d-wall-1.0,2.0])
+        rotate([90,0,0]) linear_extrude(height=case_d-wall-6.0)
             polygon(points=[
                 [-bay_opening_w/2,0], [bay_opening_w/2,0],
                 [bay_opening_w/2,bay_opening_h], [15,35],
@@ -238,9 +255,16 @@ module bay_cavity() {
 }
 
 module rear_bay_opening() {
-    translate([-bay_flange_w/2-0.35,case_d-wall-1.0,-0.4])
-        cube([bay_flange_w+0.70,wall+3.0,
-              bay_installed_z+bay_flange_h+0.8]);
+    // The narrow through-opening passes only the cartridge body. A wider,
+    // shallow outer pocket receives the flange and leaves a positive axial
+    // shoulder instead of letting the complete flange disappear into the case.
+    translate([-bay_opening_w/2,case_d-wall-1.0,-0.4])
+        cube([bay_opening_w,wall+3.0,
+              bay_installed_z+bay_opening_h+0.4]);
+    translate([-bay_flange_w/2-0.25,case_d-bay_flange_recess_d,
+               bay_installed_z-0.25])
+        cube([bay_flange_w+0.50,bay_flange_recess_d+0.6,
+              bay_flange_h+0.50]);
 }
 
 module hidden_case_watermark() {
@@ -278,7 +302,9 @@ module placed_pcb(offset_y=0,thickness=pcb_thickness) {
 }
 
 module reset_envelope(offset_y=0) {
-    translate([reset_x-1.8,pcb_rear_y-1.7+offset_y,pcb_z+pcb_thickness])
+    translate([reset_x-1.8,
+               pcb_rear_y-(3.2-reset_protrusion)+offset_y,
+               pcb_z+pcb_thickness])
         cube([3.6,3.2,2.3]);
 }
 
@@ -294,7 +320,7 @@ module left_pcb_rail() {
     difference() {
         union() {
             translate([-rail_outer_x,rail_front_y,bay_floor_h-0.10])
-                cube([rail_outer_x-slot_wall_x,rail_rear_y-rail_front_y,
+                cube([rail_outer_x-lip_inner_x,rail_rear_y-rail_front_y,
                       slot_bottom_z-bay_floor_h+0.10]);
             translate([-rail_outer_x,rail_front_y,slot_bottom_z])
                 cube([rail_outer_x-slot_wall_x,rail_rear_y-rail_front_y,
@@ -313,10 +339,10 @@ module left_pcb_rail() {
             }
             hull() {
                 translate([-rail_outer_x,rail_front_y-0.2,bay_floor_h-0.1])
-                    cube([rail_outer_x-slot_wall_x,0.4,
+                    cube([rail_outer_x-lip_inner_x,0.4,
                           slot_bottom_z-bay_floor_h+0.1]);
                 translate([-rail_outer_x,rail_mouth_y-0.2,bay_floor_h-0.1])
-                    cube([rail_outer_x-(slot_wall_x+1.3),0.4,
+                    cube([rail_outer_x-(lip_inner_x+1.3),0.4,
                           slot_bottom_z-bay_floor_h+0.1]);
             }
         }
@@ -334,10 +360,10 @@ module pcb_rails() {
 module cable_node(p) { translate([p[0],p[1],cable_z]) sphere(d=cable_d); }
 module cable_segment(a,b) { hull() { cable_node(a); cable_node(b); } }
 module cable_reference() {
-    // JST is connected before loading. The lead turns at 60 mm total depth
-    // from the USB outer edge and returns through the open rear notch.
-    pts=[[3.5,19.0],[3.5,9.0],[8.0,4.0],[18.0,4.0],
-         [24.5,10.0],[24.5,65.5]];
+    // JST is connected before loading. The outside of the measured 4.3 mm
+    // lead turns exactly 60 mm in front of the protruding USB-C edge.
+    pts=[[3.5,19.0],[3.5,10.0],[8.0,loop_front_y],[18.0,loop_front_y],
+         [24.5,12.5],[24.5,65.5]];
     for(i=[0:len(pts)-2]) cable_segment(pts[i],pts[i+1]);
 }
 
@@ -349,6 +375,43 @@ module bay_side_frames() {
     // Narrow floor runners guide the cable without forming a snap-on plate.
     translate([-bay_w/2,0,0]) cube([5.0,bay_d,bay_floor_h]);
     translate([bay_w/2-5.0,0,0]) cube([5.0,bay_d,bay_floor_h]);
+    // A four-layer front bridge joins both runners below the underside
+    // component envelope. Only the latch anchor is locally full floor height.
+    translate([-bay_w/2,0,0]) cube([bay_w,4.0,4*layer_h]);
+    translate([pcb_latch_x-pcb_latch_w/2,0,0])
+        cube([pcb_latch_w,4.0,bay_floor_h]);
+}
+
+module pcb_retention_latch() {
+    // Long 0.8 mm floor cantilever: the board nose depresses the shallow ramp
+    // by only 0.35 mm while loading. Once past it, the upright rear face stops
+    // the PCB moving toward the open end when a USB plug is inserted.
+    beam_y0=3.8;
+    translate([pcb_latch_x-pcb_latch_w/2,beam_y0,bay_floor_h])
+        cube([pcb_latch_w,pcb_latch_tip_y-beam_y0,pcb_latch_t]);
+    hull() {
+        translate([pcb_latch_x-pcb_latch_w/2,pcb_latch_tip_y-2.6,
+                   bay_floor_h+pcb_latch_t-0.05])
+            cube([pcb_latch_w,0.35,0.20]);
+        translate([pcb_latch_x-pcb_latch_w/2,pcb_latch_tip_y-0.35,
+                   bay_floor_h+pcb_latch_t-0.05])
+            cube([pcb_latch_w,0.35,
+                  pcb_latch_hook_z-(bay_floor_h+pcb_latch_t)+0.05]);
+    }
+}
+
+module cable_keepers() {
+    // Two open-top outside fences accept the already-connected 4.3 mm cable
+    // from above. A matching inside post would block the broad PCB edge while
+    // loading, so the PCB/upper rail forms the inner boundary instead.
+    keeper_wall=1.35;
+    keeper_h=cable_z+0.25;
+    for(y=[17.0,29.0]) {
+        translate([24.5+cable_d/2+0.20,y,0])
+            cube([keeper_wall,3.0,bay_floor_h]);
+        translate([24.5+cable_d/2+0.20,y,bay_floor_h])
+            cube([keeper_wall,3.0,keeper_h-bay_floor_h]);
+    }
 }
 
 module reset_cantilever() {
@@ -359,14 +422,15 @@ module reset_cantilever() {
         cube([tab_w,tab_t,tab_h]);
     translate([reset_x-1.55,bay_d-0.05,reset_z-1.55])
         cube([3.1,0.68,3.1]);
-    translate([reset_x-1.15,bay_d-5.0,reset_z-1.15])
-        cube([2.3,3.1,2.3]);
+    // 0.30 mm nominal gap to the switch envelope at rest, no preload.
+    translate([reset_x-1.15,pcb_rear_y+1.8,reset_z-1.15])
+        cube([2.3,bay_d-tab_t-(pcb_rear_y+1.8)+0.1,2.3]);
 }
 
 module bay_rear_face() {
     difference() {
-        translate([-bay_flange_w/2,bay_d-2.0,0])
-            cube([bay_flange_w,2.0,bay_flange_h]);
+        translate([-bay_flange_w/2,bay_d-bay_flange_t,0])
+            cube([bay_flange_w,bay_flange_t,bay_flange_h]);
         // USB-C plus normal moulded plug clearance.
         translate([usb_x0-2.0,bay_d-2.5,pcb_z+pcb_thickness-1.5])
             cube([(usb_x1-usb_x0)+4.0,3.5,6.4]);
@@ -393,11 +457,13 @@ module hidden_bay_watermark() {
              halign="center",valign="center",spacing=1.05);
 }
 
-module bay_v05(with_detents=true) {
+module bay_v05(with_detents=true,with_latch=true) {
     difference() {
         union() {
             bay_side_frames();
             pcb_rails();
+            cable_keepers();
+            if(with_latch) pcb_retention_latch();
             bay_rear_face();
             if(with_detents) bay_detents();
         }
@@ -415,6 +481,8 @@ module assembly_v05() {
 
 if(part=="case") case_v05();
 else if(part=="bay") bay_v05();
+else if(part=="bay_no_latch") bay_v05(true,false);
+else if(part=="pcb_latch") pcb_retention_latch();
 else if(part=="assembly") assembly_v05();
 else if(part=="pcb") { placed_pcb(); component_envelopes(); }
 else if(part=="pcb_bare") placed_pcb();
@@ -424,27 +492,47 @@ else if(part=="render_screen") render_screen_skin();
 else if(part=="render_keys") render_grey_key_skins();
 else if(part=="render_green") render_green_skins();
 else if(part=="case_bay_interference") intersection() {
-    case_core();
-    translate([0,bay_installed_y+sweep_offset,bay_installed_z]) bay_v05(false);
+    import("../stl/v0.5/minitel_case_v0.5.stl");
+    translate([0,bay_installed_y+sweep_offset,bay_installed_z]) bay_v05(false,true);
 }
 else if(part=="loaded_bay_interference") intersection() {
-    case_core();
+    import("../stl/v0.5/minitel_case_v0.5.stl");
     translate([0,bay_installed_y+sweep_offset,bay_installed_z]) union() {
-        bay_v05(false);
+        bay_v05(false,true);
         placed_pcb();
         component_envelopes(0,false);
         cable_reference();
     }
 }
 else if(part=="pcb_insertion_interference") intersection() {
-    bay_v05();
+    bay_v05(false,false);
     union() { placed_pcb(sweep_offset); component_envelopes(sweep_offset,false); }
 }
 else if(part=="bay_route_interference") intersection() {
-    bay_v05();
+    bay_v05(false,true);
     union() { placed_pcb(); component_envelopes(0,false); cable_reference(); }
 }
 else if(part=="reset_contact") intersection() {
     reset_cantilever();
     reset_envelope();
+}
+else if(part=="reset_pressed_contact") intersection() {
+    translate([0,-0.5,0]) reset_cantilever();
+    reset_envelope();
+}
+else if(part=="pcb_support_contact") intersection() {
+    bay_v05(false,false);
+    translate([0,0,-0.31]) placed_pcb();
+}
+else if(part=="pcb_latch_rest_contact") intersection() {
+    pcb_retention_latch();
+    placed_pcb();
+}
+else if(part=="pcb_latch_retention_contact") intersection() {
+    pcb_retention_latch();
+    placed_pcb(-0.70);
+}
+else if(part=="bay_stop_contact") intersection() {
+    import("../stl/v0.5/minitel_case_v0.5.stl");
+    translate([0,bay_installed_y-0.20,bay_installed_z]) bay_v05(false,false);
 }
