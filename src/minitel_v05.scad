@@ -94,6 +94,11 @@ cable_z = rail_top_z + cable_d/2 + 0.35;
 // Approximate component positions only constrain insertion and service access.
 usb_x0 = -15.5;
 usb_x1 = -7.0;
+// The physical v2 board sits lower than the first component mock suggested.
+// Keep the proven horizontal alignment, but make the service opening a
+// bottom-open notch so the USB-C shell and moulded plug can never disappear
+// behind a printed lower lip.
+usb_access_z1 = 11.8;
 reset_x = -20.9;
 reset_z = pcb_z + pcb_thickness + 1.15;
 
@@ -488,6 +493,13 @@ module component_envelopes(offset_y=0,with_reset=true) {
     translate([-2.0,18.8+offset_y,pcb_z+pcb_thickness]) cube([11.0,8.0,5.10]);
 }
 
+module usb_service_envelope() {
+    // Conservative plug/hand-access volume through the rear face. This is
+    // intentionally taller than the metal shell measured on the board.
+    translate([usb_x0-1.5,bay_d-3.0,0.20])
+        cube([(usb_x1-usb_x0)+3.0,8.0,usb_access_z1-0.40]);
+}
+
 module left_pcb_rail() {
     difference() {
         union() {
@@ -603,9 +615,11 @@ module bay_rear_face() {
     difference() {
         translate([-bay_flange_w/2,bay_d-bay_flange_t,0])
             cube([bay_flange_w,bay_flange_t,bay_flange_h]);
-        // USB-C plus normal moulded plug clearance.
-        translate([usb_x0-2.0,bay_d-2.5,pcb_z+pcb_thickness-1.5])
-            cube([(usb_x1-usb_x0)+4.0,3.5,6.4]);
+        // Bottom-open USB-C service notch. Physical fit testing showed that
+        // the connector sits below the former enclosed window. Opening the
+        // cut to the underside also avoids a fragile/sagging printed lip.
+        translate([usb_x0-2.0,bay_d-2.5,-0.1])
+            cube([(usb_x1-usb_x0)+4.0,3.5,usb_access_z1+0.1]);
         // Open-top cable lay-in notch: the DIN plug never passes through it.
         translate([20.0,bay_d-2.5,7.4]) cube([10.0,3.5,bay_flange_h+2.0]);
         // U-slot leaves the reset tongue connected only across its top edge.
@@ -668,6 +682,10 @@ else if(part=="assembly") assembly_v05();
 else if(part=="pcb") { placed_pcb(); component_envelopes(); }
 else if(part=="pcb_bare") placed_pcb();
 else if(part=="components") component_envelopes();
+else if(part=="usb_access_interference") intersection() {
+    bay_v05();
+    usb_service_envelope();
+}
 else if(part=="cable") cable_reference();
 else if(part=="render_screen") render_screen_skin();
 else if(part=="render_keys") render_grey_key_skins();
