@@ -39,7 +39,7 @@ green = export("render_green", Path("/tmp/minitel-v05-green.stl"))
 
 beige = np.array([0.82, 0.73, 0.57])
 bay_colour = np.array([0.68, 0.57, 0.41])
-screen_colour = np.array([0.025, 0.075, 0.065])
+screen_colour = np.array([0.035, 0.115, 0.095])
 key_colour = np.array([0.27, 0.24, 0.20])
 green_colour = np.array([0.15, 0.90, 0.39])
 metal = np.array([0.55, 0.58, 0.56])
@@ -57,6 +57,13 @@ rasterize(
     RENDERS / "complete-assembly-v0.5.png",
     eye=(142, -175, 112), target=(0, 10, 34), view_angle=29,
     size=(1400, 1100),
+)
+
+rasterize(
+    [(case, beige), (screen, screen_colour), (green, green_colour)],
+    RENDERS / "convex-crt-detail-v0.5.png",
+    eye=(92, -165, 82), target=(0, -1, 47), view_angle=20,
+    size=(1400, 950),
 )
 
 keyboard_exploded = np.array([0.0, -27.0, 10.0])
