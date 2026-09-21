@@ -28,7 +28,12 @@ prompt/cursor/lens in the final bounded layers. The keyboard is a separate
 flat-bottomed print, so its grey keys and green Enter key do not cause colour
 changes throughout the much larger cabinet print.
 
+The CRT face is a shallow compound curve rather than a flat plate. Its centre
+bulges forward while the perimeter stays recessed, and the beige inner bezel
+funnels inward toward that recessed edge to match the project avatar.
+
 ![Complete multicolour v0.5 assembly](assets/renders/v0.5/complete-assembly-v0.5.png)
+![Convex CRT glass and inward-running bezel](assets/renders/v0.5/convex-crt-detail-v0.5.png)
 ![Separate keyboard and four locating tongues](assets/renders/v0.5/keyboard-exploded-v0.5.png)
 ![Hollow cabinet, bay guides and print bridge ribs](assets/renders/v0.5/hollow-case-cutaway-v0.5.png)
 ![Loaded bay behind the lower rear opening](assets/renders/v0.5/rear-bay-exploded-v0.5.png)
@@ -38,8 +43,9 @@ changes throughout the much larger cabinet print.
 All three parts contain an enclosed `WDTY v0.5` watermark spanning three
 0.20 mm layers. The cabinet is a true hollow shell rather than a solid infill
 volume. Thin U-guides locate the bay and three permanent 1.2 mm bridge ribs
-reduce the rear-down front-wall bridge to 24 mm. The CRT backing overlaps the
-cabinet by 3.2 mm, so it forms one continuous structure without a slit.
+reduce the rear-down front-wall bridge to 24 mm. The curved CRT backing
+overlaps the cabinet by 3.2 mm, so it forms one continuous structure without
+a slit.
 
 This remains a mechanical prototype, not a fit-verified release. The revised
 bay has a releasable PCB latch, a positive flange shoulder and open guides for
