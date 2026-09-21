@@ -250,13 +250,22 @@ module front_features() {
     translate([0,3.2,0])
         rounded_xz(case_w-0.8,case_h-0.8,5.2,case_corner-0.4);
 
-    // Screen surface and broad stepped surround from the avatar. Both overlap
-    // the fascia behind them by 0.2 mm. The cutter passes completely through
-    // the bezel, leaving a real ring rather than two coincident plates.
-    translate([0,-1.80,26.25]) rounded_xz(63.0,39.5,1.45,5.0);
+    // Convex CRT glass. Six nested profiles approximate the shallow compound
+    // curve visible in the project avatar: the edge stays recessed while the
+    // centre comes forward, but remains behind the beige bezel face.
+    crt_screen_bulb();
+
+    // The inner bezel is funnel-shaped rather than a flat punched ring. The
+    // aperture is tight at the recessed screen edge and opens toward the
+    // viewer, producing the characteristic inward-running Minitel surround.
     difference() {
-        translate([0,-1.80,23.0]) rounded_xz(69.0,46.0,1.70,5.2);
-        translate([0,-1.50,26.65]) rounded_xz(62.2,38.7,2.30,4.9);
+        translate([0,-1.80,23.0]) rounded_xz(69.0,46.0,2.30,5.2);
+        hull() {
+            translate([0,-1.35,26.55])
+                rounded_xz(62.4,38.9,0.20,4.85);
+            translate([0,-4.18,25.50])
+                rounded_xz(64.5,41.0,0.30,5.15);
+        }
     }
 
     // Three shallow horizontal cabinet ribs above the CRT.
@@ -264,12 +273,12 @@ module front_features() {
         translate([-33.0,-2.05,z]) cube([66.0,0.55,0.42]);
 
     // Green prompt and block cursor, embossed for multicolour face painting.
-    translate([-22.0,-3.25,51.0]) rotate([90,0,0])
-        linear_extrude(height=0.40)
+    translate([-22.0,-3.45,51.0]) rotate([90,0,0])
+        linear_extrude(height=0.55)
             text(">",size=7.0,font="Liberation Mono:style=Bold",
                  halign="left",valign="center");
-    translate([-13.1,-3.25,48.1]) rotate([90,0,0])
-        linear_extrude(height=0.40) square([4.0,6.2]);
+    translate([-13.1,-3.45,48.1]) rotate([90,0,0])
+        linear_extrude(height=0.55) square([4.0,6.2]);
 
     // Status lens on the right side of the bezel.
     translate([34.2,-3.45,29.0]) rounded_xz(2.6,5.0,0.60,0.65);
@@ -277,8 +286,34 @@ module front_features() {
 
 // Render-only coloured surface skins. They overlap the printable one-piece
 // case by 0.08 mm and are never exported as additional print parts.
+module crt_profile(inset_x,inset_z,y) {
+    translate([0,y,26.25+inset_z])
+        rounded_xz(63.0-2*inset_x,39.5-2*inset_z,0.16,
+                   max(1.6,5.0-inset_z*0.20));
+}
+
+module crt_screen_bulb(y_shift=0) {
+    // Separate horizontal/vertical insets let the last profile become a small
+    // central patch rather than a broad flat plate. The non-linear Y spacing
+    // produces a progressively flatter tangent toward the crown.
+    insets_x=[0.0,0.5,1.8,4.0,8.0,14.0,25.0];
+    insets_z=[0.0,0.4,1.3,3.0,6.0,11.0,17.0];
+    faces=[-1.68,-2.30,-2.88,-3.30,-3.60,-3.78,-3.85];
+
+    translate([0,y_shift,0]) union() {
+        // Positive overlap with the structural fascia at the outer edge.
+        translate([0,-1.45,26.25]) rounded_xz(63.0,39.5,0.34,5.0);
+        for(i=[0:len(insets_x)-2]) hull() {
+            crt_profile(insets_x[i],insets_z[i],faces[i]);
+            crt_profile(insets_x[i+1],insets_z[i+1],faces[i+1]);
+        }
+    }
+}
+
 module render_screen_skin() {
-    translate([0,-3.27,26.90]) rounded_xz(61.7,38.2,0.10,4.75);
+    // Shift the complete bulb 0.08 mm toward the viewer so the renderer can
+    // colour the curved glass without creating another printable component.
+    crt_screen_bulb(-0.08);
 }
 
 module render_key_skin(x,y,w=4.2,d=3.5) {
@@ -306,11 +341,11 @@ module render_grey_key_skins() {
 module render_green_skins() {
     render_key_skin(15.15,-19.4,6.5,4.1);
     translate([34.2,-4.07,29.075]) rounded_xz(2.45,4.85,0.10,0.58);
-    translate([-22.0,-3.67,51.0]) rotate([90,0,0])
+    translate([-22.0,-4.02,51.0]) rotate([90,0,0])
         linear_extrude(height=0.10)
             text(">",size=7.0,font="Liberation Mono:style=Bold",
                  halign="left",valign="center");
-    translate([-13.1,-3.67,48.1]) rotate([90,0,0])
+    translate([-13.1,-4.02,48.1]) rotate([90,0,0])
         linear_extrude(height=0.10) square([4.0,6.2]);
 }
 
